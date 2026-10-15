@@ -1,0 +1,14 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(python -m http.server 8471)",
+      "Bash(echo \"PID=$!\")",
+      "Bash(curl -s -o /dev/null -w \"%{http_code}\" http://127.0.0.1:8471/assets/fps_arms_anim.glb)",
+      "Bash(curl -s -o /dev/null -w \"status=%{http_code} size=%{size_download}\\\\n\" http://127.0.0.1:8471/assets/fps_arms_anim.glb)",
+      "Bash(curl -s -o /dev/null -w \"status=%{http_code} size=%{size_download}\\\\n\" http://127.0.0.1:8471/assets/ak47.glb)",
+      "Bash(curl -s -o /dev/null -w \"status=%{http_code} size=%{size_download}\\\\n\" http://127.0.0.1:8471/assets/arms.glb)",
+      "Read(//c/tmp/vtest/**)",
+      "Bash(node test.js)"
+    ]
+  }
+}

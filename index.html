@@ -1,0 +1,722 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>Vespera</title>
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🧟</text></svg>">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600;700&family=Outfit:wght@300;400;500;600;700;800&family=Rajdhani:wght@500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="css/style.css?v=24">
+<script>
+window._onStartBtn = function(){
+  if (window.Preloader){
+    if (Preloader.isReady){
+      if (window.Main && Main.start) Main.start();
+    } else {
+      Preloader.requestStart();
+    }
+  } else if (window.Main && Main.start){
+    Main.start();
+  } else {
+    window._pendingStart = true;
+    var note = document.getElementById('loading-note');
+    if (note) note.style.display = 'block';
+  }
+};
+</script>
+</head>
+<body>
+<canvas id="game"></canvas>
+
+<!-- HUD -->
+<div id="hud">
+  <div id="crosshair">
+    <div id="hip-crosshair">
+      <span class="ch-dot"></span>
+      <span class="ch-line ch-t"></span>
+      <span class="ch-line ch-b"></span>
+      <span class="ch-line ch-left"></span>
+      <span class="ch-line ch-right"></span>
+    </div>
+    <div id="ads-crosshair">
+      <span class="ads-dot"></span>
+      <div class="ads-reticle-ring"></div>
+      <span class="ads-tick ads-t"></span>
+      <span class="ads-tick ads-b"></span>
+      <span class="ads-tick ads-l"></span>
+      <span class="ads-tick ads-r"></span>
+    </div>
+    <div id="veh-crosshair" style="display:none;">
+      <span class="veh-dot"></span>
+      <span class="veh-bracket veh-bracket-l"></span>
+      <span class="veh-bracket veh-bracket-r"></span>
+      <span class="veh-lead-t"></span>
+      <span class="veh-lead-b"></span>
+    </div>
+    <div id="hitmarker">
+      <span class="hm-tick hm-tl"></span>
+      <span class="hm-tick hm-tr"></span>
+      <span class="hm-tick hm-bl"></span>
+      <span class="hm-tick hm-br"></span>
+    </div>
+  </div>
+  <div id="bottom-left">
+    <div id="health-wrap"><div id="health-bar"></div><span id="health-num">100</span></div>
+    <div id="armor-wrap"><div id="armor-bar"></div></div>
+  </div>
+  <div id="bottom-right">
+    <div id="weapon-name">ACR Suppressed</div>
+    <div id="ammo"><span id="ammo-mag">30</span><span class="ammo-sep">/</span><span id="ammo-res">120</span></div>
+    <div id="mag-pips"></div>
+    <div id="scrap-wrap"><span class="scrap-icon">🔩</span> <span id="scrap-num">30</span> <span class="scrap-lbl">SCRAP</span></div>
+  </div>
+  <!-- High-Performance Motorsport Racing Telemetry HUD (Pure 2D Canvas + 4 Themes) -->
+  <!-- High-Performance Motorsport Transparent Speedometer & Tachometer Gauge Overlay -->
+  <div id="car-cluster" style="display:none;">
+    <canvas id="cc-gauge-canvas" width="280" height="280"></canvas>
+  </div>
+  <div id="top-right">
+    <div id="clock">07:20</div>
+    <div id="phase-label">DAY</div>
+  </div>
+  <div id="top-left">
+    <canvas id="minimap" width="180" height="180"></canvas>
+    <div id="objective" style="display:none;"></div>
+    <div id="car-weapon-hud" style="display:none;">
+      <div class="cwh-header">
+        <span id="cwh-slot" class="cwh-slot">1</span>
+        <span id="cwh-name" class="cwh-name">ACR 5.56 SILENCED</span>
+        <span id="cwh-mode" class="cwh-mode">AUTO</span>
+      </div>
+      <div class="cwh-main">
+        <div class="cwh-digits">
+          <span id="cwh-mag" class="cwh-mag">30</span>
+          <span class="cwh-sep">/</span>
+          <span id="cwh-res" class="cwh-res">120</span>
+        </div>
+        <span id="cwh-status" class="cwh-status">READY</span>
+      </div>
+      <div id="cwh-pips" class="cwh-pips"></div>
+      <div class="cwh-hints">LMB FIRE &bull; RMB AIM &bull; R RELOAD</div>
+    </div>
+  </div>
+  <div id="radio-sub"><span id="radio-name"></span><span id="radio-text"></span></div>
+  <div id="interact-hint">Press E to enter car</div>
+  <div id="vignette"></div>
+  <div id="damage-flash"></div>
+  <div id="damage-indicator-layer"></div>
+  <div id="low-health-vignette"></div>
+  <div id="lightning-flash"></div>
+  <div id="acid-vignette"></div>
+  <div id="uplink-hud" style="display:none;">
+    <div class="uplink-label">📡 TRANSMITTER UPLINK</div>
+    <div class="uplink-bar-wrap"><div id="uplink-bar"></div></div>
+    <div id="uplink-num">0%</div>
+  </div>
+  <div id="weapon-unlock-banner">
+    <div class="wub-tag">WEAPON ACQUIRED</div>
+    <div id="wub-name" class="wub-title">PUMP-ACTION 12G SHOTGUN</div>
+  </div>
+</div>
+
+<!-- Touch controls -->
+<div id="touch-ui">
+  <div id="joy-move"><div id="joy-knob"></div></div>
+  <div id="look-zone"></div>
+  <div class="tbtn" id="btn-fire">FIRE</div>
+  <div class="tbtn" id="btn-jump">JUMP</div>
+  <div class="tbtn" id="btn-enter">CAR</div>
+  <div class="tbtn" id="btn-reload">R</div>
+  <div class="tbtn" id="btn-sprint">RUN</div>
+  <div class="tbtn" id="btn-stage-rev" style="display:none;" title="Accelerate / Staging Rev">STAGE 🔥</div>
+</div>
+
+<!-- Fullscreen Tactical Preload Overlay (Displayed if player triggers entry while assets are caching) -->
+<div id="preloader-overlay" style="display:none;" role="status" aria-live="polite">
+  <div class="po-box">
+    <div class="po-glow"></div>
+    <div class="po-header">
+      <div class="po-sys-badge">
+        <span class="po-pulse-dot"></span>
+        <span>SYS // VRAM STREAMING & SHADER WARMUP</span>
+      </div>
+      <h2 class="po-title">INITIALIZING VESPERA</h2>
+      <div class="po-sub">PRE-CACHING 3D ASSETS & SHADERS FOR LOCKED 60 FPS</div>
+    </div>
+    <div class="po-bar-track">
+      <div class="po-bar-fill" id="po-bar-fill"></div>
+    </div>
+    <div class="po-status-row">
+      <div class="po-status-text" id="po-status-text">INITIALIZING ASSET PIPELINE...</div>
+      <div class="po-percent" id="po-percent">0%</div>
+    </div>
+    <div class="po-footer-note">
+      ⚡ Pre-warming shaders and textures in GPU memory completely eliminates in-game turning stutters.
+    </div>
+  </div>
+</div>
+
+<!-- Menus -->
+<div id="menu">
+  <div id="menu-inner">
+    <h1>VESPERA</h1>
+    <p class="tagline">The fog came at dusk. It never left.</p>
+    <div id="menu-story">A golden fog rolled into the coastal city of Vespera and never left. Whoever breathed it at dusk... changed. The city emptied in a week.<br><br>You wake behind the wheel of a burnt-orange supercar on an empty boulevard. An AK-47 on the passenger seat. A voice on the radio, speaking only to you. You don't remember driving here.<br><br>By day, scavenge. Steal cars. Follow the radio. At dusk, the fog thickens — and the infected hunt. Survive till dawn.</div>
+
+    <!-- Tactical Preloader & VRAM Stream Status -->
+    <div id="loading-panel" class="loading-panel">
+      <div class="lp-header">
+        <div class="lp-sys-tag">
+          <span class="lp-pulse-dot"></span>
+          <span class="lp-sys-text">SYS // PRE-CACHING VRAM & 3D ASSETS</span>
+        </div>
+        <div class="lp-counter" id="lp-counter">STREAMING PIPELINE...</div>
+      </div>
+      
+      <div class="lp-bar-track">
+        <div class="lp-bar-fill" id="lp-bar-fill"></div>
+      </div>
+      
+      <div class="lp-status-row">
+        <div class="lp-status-ticker" id="lp-status-ticker">STREAMING 3D VEHICLES & CITY GEOMETRY...</div>
+        <div class="lp-percent" id="lp-percent">0%</div>
+      </div>
+    </div>
+
+    <div class="menu-btn-row">
+      <button id="btn-start" onclick="_onStartBtn()" class="btn-start-loading">
+        <span class="btn-start-icon" id="btn-start-icon">⏳</span>
+        <span id="btn-start-text">STREAMING ASSETS... [ 0% ]</span>
+      </button>
+      <button id="btn-start-settings" type="button" onclick="HUD.togglePause()">⚙ CONFIGURATION</button>
+    </div>
+    <div id="controls-help">
+      <b>Desktop:</b> WASD move · Mouse look · Click/X fire · R reload · E interact/car · O open/close door · Shift sprint · Space jump<br>
+      <b>Phone:</b> Left stick move · Drag right side to look · Buttons for fire/jump/car
+    </div>
+    <div id="loading-note">Waking up on the boulevard...</div>
+    <div id="credits">"Buildings" by Elbolillo (CC-BY 4.0) &bull; "Futuristic Building" by 3DHaupt (CC-BY-NC 4.0) &bull; "Low-poly City Buildings" by smooth998 (CC-BY 4.0) &bull; 3D character "Mannequiny" by GDQuest &bull; CC-BY 4.0 &bull; Zombie by Quaternius &bull; CC-BY 3.0 (poly.pizza) &bull; AK-47 by loafbrr_1 &bull; CC0 (opengameart.org) &bull; Soldier by Quaternius &bull; CC0 (poly.pizza) &bull; Animated FPS hands & rifle by ccransh (CC-BY, Sketchfab), hands by @bumstrum &bull; "FPS pistol animations" by Cransh (CC-BY 4.0) &bull; "Animated Shotgun" (<a href="https://skfb.ly/oODMT" target="_blank" rel="noopener" style="color:#888;">skfb.ly/oODMT</a>) by JUST (CC-BY 4.0) &bull; "Mercedes-Benz AMG ONE" (<a href="https://skfb.ly/pOoxN" target="_blank" rel="noopener" style="color:#888;">skfb.ly/pOoxN</a>) by DRIVER-FIRE (CC-BY 4.0) &bull; "2018 Dodge Challenger SRT Demon" (<a href="https://skfb.ly/puK6w" target="_blank" rel="noopener" style="color:#888;">skfb.ly/puK6w</a>) by Ddiaz Design (CC-BY-NC-SA 4.0)</div>
+  </div>
+</div>
+
+<div id="death-screen">
+  <h2>YOU DIED</h2>
+  <p id="death-sub">The fog takes everyone, eventually.</p>
+  <button id="btn-respawn">WAKE AGAIN</button>
+</div>
+
+<!-- Dark Minimalist Tactical Settings & Configuration -->
+<div id="pause-menu" style="display:none;" role="dialog" aria-modal="true" aria-label="System Configuration">
+  <div id="pause-box">
+    <!-- Ambient Cybernetic Glow Backdrop -->
+    <div class="pm-bg-glow"></div>
+    <div class="pm-scanlines"></div>
+
+    <!-- Header Section -->
+    <div class="pm-header">
+      <div class="pm-header-left">
+        <div class="pm-sys-badge">
+          <span class="pm-pulse-pip"></span>
+          <span class="pm-sys-code">SYS // OVERRIDE 09</span>
+        </div>
+        <h2 class="pm-title">VESPERA CONFIGURATION</h2>
+        <div class="pm-sub">TACTICAL SYSTEM CONTROLS &bull; HARDWARE PROFILES</div>
+      </div>
+      <div class="pm-header-right">
+        <div class="pm-status-pill" id="pm-live-fps-pill">
+          <span class="pm-pill-dot"></span>
+          <span id="pm-fps-counter">60 FPS</span>
+        </div>
+        <div class="pm-status-pill pm-pill-cyan" id="pm-live-res-pill">
+          <span id="val-render-res">1920 &times; 1080</span>
+        </div>
+        <button id="pm-close" class="pm-close-btn" onclick="HUD.togglePause()" title="Close Configuration (ESC)" aria-label="Close settings">&times;</button>
+      </div>
+    </div>
+
+    <!-- Minimalist Tab Bar -->
+    <div class="pm-nav-tabs">
+      <button class="pm-tab-btn active" id="pm-tab-btn-av" type="button" onclick="HUD.switchSettingsTab('av')">
+        <span class="pm-tab-num">01</span>
+        <span class="pm-tab-text">AUDIO & GRAPHICS</span>
+      </button>
+      <button class="pm-tab-btn" id="pm-tab-btn-ctrl" type="button" onclick="HUD.switchSettingsTab('ctrl')">
+        <span class="pm-tab-num">02</span>
+        <span class="pm-tab-text">CONTROLS & BINDINGS</span>
+      </button>
+      <button class="pm-tab-btn" id="pm-tab-btn-sys" type="button" onclick="HUD.switchSettingsTab('sys')">
+        <span class="pm-tab-num">03</span>
+        <span class="pm-tab-text">TELEMETRY & HARDWARE</span>
+      </button>
+    </div>
+
+    <!-- Tab Contents Container -->
+    <div class="pm-tab-content">
+      
+      <!-- TAB 1: AUDIO & GRAPHICS -->
+      <div class="pm-pane active" id="pm-pane-av">
+        <div class="pm-pane-grid">
+          
+          <!-- Column 1: Display & Performance Engine -->
+          <div class="pm-card">
+            <div class="pm-card-header">
+              <span class="pm-card-icon">⚡</span>
+              <span class="pm-card-title">RENDER ENGINE & RESOLUTION SCALE</span>
+            </div>
+            
+            <!-- Resolution Scale (Step 2 Key Requirement) -->
+            <div class="pm-ctrl-block">
+              <div class="pm-lbl">
+                <span class="pm-lbl-left"><span>RESOLUTION SCALE</span><button type="button" class="pm-help" onmouseenter="HUD.showTooltip(this, 'RESOLUTION SCALE', 'Scales the 3D internal rendering resolution without resizing the window. Lower to 50%–75% for massive FPS gains on budget laptops; keep at 100% for native sharpness.')" onmouseleave="HUD.hideTooltip()" onfocus="HUD.showTooltip(this, 'RESOLUTION SCALE', 'Scales the 3D internal rendering resolution without resizing the window. Lower to 50%–75% for massive FPS gains on budget laptops; keep at 100% for native sharpness.')" onblur="HUD.hideTooltip()">?</button></span>
+                <span id="val-res-scale" class="pm-val-badge">100%</span>
+              </div>
+              <div class="pm-slider-wrap">
+                <input type="range" id="slider-res-scale" min="0.5" max="1.0" step="0.05" value="1.0"
+                  oninput="HUD.onSettingChange('resolutionScale', this.value)">
+                <div class="pm-scale-ticks">
+                  <span>50% (Eco)</span>
+                  <span>75% (Smooth)</span>
+                  <span>100% (Native)</span>
+                </div>
+              </div>
+              <div class="pm-info-note">
+                Fine-tune internal rendering buffer to achieve locked 60 FPS on laptops and integrated GPUs.
+              </div>
+            </div>
+
+            <!-- Graphics Quality Presets -->
+            <div class="pm-ctrl-block">
+              <div class="pm-lbl">
+                <span class="pm-lbl-left"><span>GRAPHICS QUALITY PRESET</span><button type="button" class="pm-help" onmouseenter="HUD.showTooltip(this, 'GRAPHICS QUALITY', 'Global visual preset. HIGH enables anti-aliasing & 1.25x pixel supersampling. BALANCED uses 1.0x native rendering. LOW optimizes for maximum 60 FPS performance.')" onmouseleave="HUD.hideTooltip()" onfocus="HUD.showTooltip(this, 'GRAPHICS QUALITY', 'Global visual preset. HIGH enables anti-aliasing & 1.25x pixel supersampling. BALANCED uses 1.0x native rendering. LOW optimizes for maximum 60 FPS performance.')" onblur="HUD.hideTooltip()">?</button></span>
+                <span id="val-gfx" class="pm-val-badge">HIGH</span>
+              </div>
+              <div class="pm-btn-group">
+                <button class="pm-opt-btn active" id="btn-gfx-high" type="button" onclick="HUD.onSettingChange('graphicsQuality', 'high')">
+                  <span class="pm-opt-main">HIGH</span>
+                  <span class="pm-opt-sub">MSAA 1.25x</span>
+                </button>
+                <button class="pm-opt-btn" id="btn-gfx-med" type="button" onclick="HUD.onSettingChange('graphicsQuality', 'med')">
+                  <span class="pm-opt-main">BALANCED</span>
+                  <span class="pm-opt-sub">1.0x Native</span>
+                </button>
+                <button class="pm-opt-btn" id="btn-gfx-low" type="button" onclick="HUD.onSettingChange('graphicsQuality', 'low')">
+                  <span class="pm-opt-main">LOW</span>
+                  <span class="pm-opt-sub">0.75x Fast</span>
+                </button>
+              </div>
+            </div>
+
+            <!-- Vehicle Powertrain Acoustics -->
+            <div class="pm-ctrl-block">
+              <div class="pm-lbl">
+                <span class="pm-lbl-left"><span>DYNAMIC RPM GEAR SHIFTS</span><button type="button" class="pm-help" onmouseenter="HUD.showTooltip(this, 'RPM GEAR SHIFTS', 'Simulates realistic powertrain acoustics. SIMULATED switches pitch dynamically across 6 vehicle gears. FLAT PURR uses a steady, non-shifting engine note.')" onmouseleave="HUD.hideTooltip()" onfocus="HUD.showTooltip(this, 'RPM GEAR SHIFTS', 'Simulates realistic powertrain acoustics. SIMULATED switches pitch dynamically across 6 vehicle gears. FLAT PURR uses a steady, non-shifting engine note.')" onblur="HUD.hideTooltip()">?</button></span>
+                <span id="val-rpm-toggle" class="pm-val-badge">SIMULATED</span>
+              </div>
+              <div class="pm-btn-group">
+                <button class="pm-opt-btn active" id="btn-rpm-on" type="button" onclick="HUD.onSettingChange('rpmModEnabled', true)">
+                  <span class="pm-opt-main">SIMULATED</span>
+                  <span class="pm-opt-sub">F1 Hybrid / V8 Blow</span>
+                </button>
+                <button class="pm-opt-btn" id="btn-rpm-off" type="button" onclick="HUD.onSettingChange('rpmModEnabled', false)">
+                  <span class="pm-opt-main">FLAT PURR</span>
+                  <span class="pm-opt-sub">Constant Pitch</span>
+                </button>
+              </div>
+            </div>
+
+            <div class="pm-ctrl-block">
+              <div class="pm-lbl">
+                <span class="pm-lbl-left"><span>RPM PITCH MODULATION</span><button type="button" class="pm-help" onmouseenter="HUD.showTooltip(this, 'RPM MODULATION', 'Controls the acoustic range and throttle response intensity of vehicle engine audio during acceleration.')" onmouseleave="HUD.hideTooltip()" onfocus="HUD.showTooltip(this, 'RPM MODULATION', 'Controls the acoustic range and throttle response intensity of vehicle engine audio during acceleration.')" onblur="HUD.hideTooltip()">?</button></span>
+                <span id="val-rpm-intensity" class="pm-val-badge">100%</span>
+              </div>
+              <input type="range" id="slider-rpm-intensity" min="0" max="1.5" step="0.05" value="1.0"
+                oninput="HUD.onSettingChange('rpmIntensity', this.value)">
+            </div>
+
+            <!-- Motorsport Telemetry HUD Theme Presets -->
+            <div class="pm-ctrl-block">
+              <div class="pm-lbl">
+                <span class="pm-lbl-left"><span>SPEEDOMETER CLUSTER THEME</span><button type="button" class="pm-help" onmouseenter="HUD.showTooltip(this, 'SPEEDOMETER THEME', 'Choose between 4 authentic motorsport racing telemetry instrument palettes: JDM Warm Amber, Toxic Lime, Track Crimson, and Ghost Monochrome.')" onmouseleave="HUD.hideTooltip()" onfocus="HUD.showTooltip(this, 'SPEEDOMETER THEME', 'Choose between 4 authentic motorsport racing telemetry instrument palettes: JDM Warm Amber, Toxic Lime, Track Crimson, and Ghost Monochrome.')" onblur="HUD.hideTooltip()">?</button></span>
+                <span id="val-speedo-theme" class="pm-val-badge">JDM AMBER</span>
+              </div>
+              <div class="pm-btn-group pm-theme-group">
+                <button class="pm-opt-btn active" id="btn-theme-amber" type="button" onclick="HUD.setSpeedoTheme('amber')">
+                  <span class="pm-theme-dot" style="background:#ff9e00;"></span>
+                  <span class="pm-opt-main">AMBER</span>
+                  <span class="pm-opt-sub">JDM Warm</span>
+                </button>
+                <button class="pm-opt-btn" id="btn-theme-toxic" type="button" onclick="HUD.setSpeedoTheme('toxic')">
+                  <span class="pm-theme-dot" style="background:#a3ff12;"></span>
+                  <span class="pm-opt-main">TOXIC</span>
+                  <span class="pm-opt-sub">Lime Green</span>
+                </button>
+                <button class="pm-opt-btn" id="btn-theme-crimson" type="button" onclick="HUD.setSpeedoTheme('crimson')">
+                  <span class="pm-theme-dot" style="background:#ff1e42;"></span>
+                  <span class="pm-opt-main">CRIMSON</span>
+                  <span class="pm-opt-sub">Track Red</span>
+                </button>
+                <button class="pm-opt-btn" id="btn-theme-monochrome" type="button" onclick="HUD.setSpeedoTheme('monochrome')">
+                  <span class="pm-theme-dot" style="background:#ffffff;"></span>
+                  <span class="pm-opt-main">GHOST</span>
+                  <span class="pm-opt-sub">Monochrome</span>
+                </button>
+              </div>
+            </div>
+
+            <!-- Speedometer Speed Unit (MPH / KMH) -->
+            <div class="pm-ctrl-block">
+              <div class="pm-lbl">
+                <span class="pm-lbl-left"><span>SPEEDOMETER UNIT</span><button type="button" class="pm-help" onmouseenter="HUD.showTooltip(this, 'SPEED UNIT', 'Toggles instrument telemetry display between Imperial Miles Per Hour (MPH) and Metric Kilometers Per Hour (KM/H).')" onmouseleave="HUD.hideTooltip()" onfocus="HUD.showTooltip(this, 'SPEED UNIT', 'Toggles instrument telemetry display between Imperial Miles Per Hour (MPH) and Metric Kilometers Per Hour (KM/H).')" onblur="HUD.hideTooltip()">?</button></span>
+                <span id="val-speedo-unit" class="pm-val-badge">MPH</span>
+              </div>
+              <div class="pm-btn-group">
+                <button class="pm-opt-btn active" id="btn-unit-mph" type="button" onclick="HUD.setSpeedoUnit('MPH')">
+                  <span class="pm-opt-main">MPH</span>
+                  <span class="pm-opt-sub">Miles / Hr</span>
+                </button>
+                <button class="pm-opt-btn" id="btn-unit-kmh" type="button" onclick="HUD.setSpeedoUnit('KM/H')">
+                  <span class="pm-opt-main">KM/H</span>
+                  <span class="pm-opt-sub">Metric Km / Hr</span>
+                </button>
+              </div>
+            </div>
+          </div>
+
+          <!-- Column 2: Acoustic Channels -->
+          <div class="pm-card">
+            <div class="pm-card-header">
+              <span class="pm-card-icon">🔊</span>
+              <span class="pm-card-title">ACOUSTIC GAIN & MIXER</span>
+            </div>
+
+            <div class="pm-ctrl-block">
+              <div class="pm-lbl">
+                <span class="pm-lbl-left"><span>MASTER GAIN</span><button type="button" class="pm-help" onmouseenter="HUD.showTooltip(this, 'MASTER GAIN', 'Overall master audio output volume across all game sounds, weapons, vehicles, and weather.')" onmouseleave="HUD.hideTooltip()" onfocus="HUD.showTooltip(this, 'MASTER GAIN', 'Overall master audio output volume across all game sounds, weapons, vehicles, and weather.')" onblur="HUD.hideTooltip()">?</button></span>
+                <span id="val-master-vol" class="pm-val-badge">70%</span>
+              </div>
+              <input type="range" id="slider-master-vol" min="0" max="1" step="0.02" value="0.7"
+                oninput="HUD.onSettingChange('masterVol', this.value)">
+            </div>
+
+            <div class="pm-ctrl-block">
+              <div class="pm-lbl">
+                <span class="pm-lbl-left"><span>TACTICAL SFX & WEAPONS</span><button type="button" class="pm-help" onmouseenter="HUD.showTooltip(this, 'SFX & WEAPONS', 'Volume of gunshots, bullet impacts, mechanical reloads, shell brass ejections, and enemy sound effects.')" onmouseleave="HUD.hideTooltip()" onfocus="HUD.showTooltip(this, 'SFX & WEAPONS', 'Volume of gunshots, bullet impacts, mechanical reloads, shell brass ejections, and enemy sound effects.')" onblur="HUD.hideTooltip()">?</button></span>
+                <span id="val-sfx-vol" class="pm-val-badge">85%</span>
+              </div>
+              <input type="range" id="slider-sfx-vol" min="0" max="1" step="0.02" value="0.85"
+                oninput="HUD.onSettingChange('sfxVol', this.value)">
+            </div>
+
+            <div class="pm-ctrl-block">
+              <div class="pm-lbl">
+                <span class="pm-lbl-left"><span>VEHICLE ENGINE & EXHAUST</span><button type="button" class="pm-help" onmouseenter="HUD.showTooltip(this, 'VEHICLE POWERTRAIN', 'Volume of the Mercedes-AMG ONE turbo-hybrid and Dodge Challenger SRT Demon supercharged V8 engine roar.')" onmouseleave="HUD.hideTooltip()" onfocus="HUD.showTooltip(this, 'VEHICLE POWERTRAIN', 'Volume of the Mercedes-AMG ONE turbo-hybrid and Dodge Challenger SRT Demon supercharged V8 engine roar.')" onblur="HUD.hideTooltip()">?</button></span>
+                <span id="val-engine-vol" class="pm-val-badge">85%</span>
+              </div>
+              <input type="range" id="slider-engine-vol" min="0" max="1" step="0.02" value="0.85"
+                oninput="HUD.onSettingChange('engineVol', this.value)">
+            </div>
+
+            <div class="pm-ctrl-block">
+              <div class="pm-lbl">
+                <span class="pm-lbl-left"><span>AMBIENCE & WEATHER CYCLE</span><button type="button" class="pm-help" onmouseenter="HUD.showTooltip(this, 'AMBIENCE & WEATHER', 'Volume of atmospheric rain, thunderclaps, wind, midnight fog ambiance, and dusk air-raid sirens.')" onmouseleave="HUD.hideTooltip()" onfocus="HUD.showTooltip(this, 'AMBIENCE & WEATHER', 'Volume of atmospheric rain, thunderclaps, wind, midnight fog ambiance, and dusk air-raid sirens.')" onblur="HUD.hideTooltip()">?</button></span>
+                <span id="val-amb-vol" class="pm-val-badge">65%</span>
+              </div>
+              <input type="range" id="slider-amb-vol" min="0" max="1" step="0.02" value="0.65"
+                oninput="HUD.onSettingChange('ambienceVol', this.value)">
+            </div>
+
+            <div class="pm-mixer-visualizer">
+              <div class="pm-vis-bar" style="height: 40%"></div>
+              <div class="pm-vis-bar" style="height: 65%"></div>
+              <div class="pm-vis-bar" style="height: 85%"></div>
+              <div class="pm-vis-bar" style="height: 50%"></div>
+              <div class="pm-vis-bar" style="height: 75%"></div>
+              <div class="pm-vis-bar" style="height: 90%"></div>
+              <div class="pm-vis-bar" style="height: 60%"></div>
+              <div class="pm-vis-bar" style="height: 35%"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- TAB 2: CONTROLS & BINDINGS -->
+      <div class="pm-pane" id="pm-pane-ctrl">
+        <div class="pm-ctrl-top-bar">
+          <!-- Mouse Sensitivity -->
+          <div class="pm-card pm-card-sens">
+            <div class="pm-lbl">
+              <span class="pm-lbl-left"><span>MOUSE LOOK SENSITIVITY</span><button type="button" class="pm-help" onmouseenter="HUD.showTooltip(this, 'LOOK SENSITIVITY', 'Adjusts camera rotation speed when moving the mouse. Aim Down Sights (ADS) automatically applies a stabilized 0.64x precision multiplier.')" onmouseleave="HUD.hideTooltip()" onfocus="HUD.showTooltip(this, 'LOOK SENSITIVITY', 'Adjusts camera rotation speed when moving the mouse. Aim Down Sights (ADS) automatically applies a stabilized 0.64x precision multiplier.')" onblur="HUD.hideTooltip()">?</button></span>
+              <span id="val-mouse-sens" class="pm-val-badge">1.00x</span>
+            </div>
+            <input type="range" id="slider-mouse-sens" min="0.2" max="3.0" step="0.05" value="1.0"
+              oninput="HUD.onSettingChange('mouseSens', this.value)">
+          </div>
+
+          <!-- Sprint Mode Toggle vs Hold (Key Requirement) -->
+          <div class="pm-card pm-card-mode">
+            <div class="pm-lbl">
+              <span class="pm-lbl-left"><span>SPRINT INPUT MODE</span><button type="button" class="pm-help" onmouseenter="HUD.showTooltip(this, 'SPRINT MODE', 'HOLD: Run only while holding the Sprint key (Shift). TOGGLE: Tap once to toggle running; automatically returns to walking when coming to a complete stop.')" onmouseleave="HUD.hideTooltip()" onfocus="HUD.showTooltip(this, 'SPRINT MODE', 'HOLD: Run only while holding the Sprint key (Shift). TOGGLE: Tap once to toggle running; automatically returns to walking when coming to a complete stop.')" onblur="HUD.hideTooltip()">?</button></span>
+              <span id="val-sprint-mode" class="pm-val-badge">HOLD</span>
+            </div>
+            <div class="pm-btn-group">
+              <button class="pm-opt-btn active" id="btn-sprint-hold" type="button" onclick="HUD.onSettingChange('sprintToggle', false)">
+                <span class="pm-opt-main">HOLD</span>
+                <span class="pm-opt-sub">Standard</span>
+              </button>
+              <button class="pm-opt-btn" id="btn-sprint-toggle" type="button" onclick="HUD.onSettingChange('sprintToggle', true)">
+                <span class="pm-opt-main">TOGGLE</span>
+                <span class="pm-opt-sub">Press to Run</span>
+              </button>
+            </div>
+          </div>
+
+          <!-- ADS Mode Toggle vs Hold (Key Requirement) -->
+          <div class="pm-card pm-card-mode">
+            <div class="pm-lbl">
+              <span class="pm-lbl-left"><span>AIM (ADS) INPUT MODE</span><button type="button" class="pm-help" onmouseenter="HUD.showTooltip(this, 'ADS AIM MODE', 'HOLD: Hold Right Mouse Button (RMB) to aim down sights. TOGGLE: Click once to zoom with precision holographic reticle; click again to return to hipfire.')" onmouseleave="HUD.hideTooltip()" onfocus="HUD.showTooltip(this, 'ADS AIM MODE', 'HOLD: Hold Right Mouse Button (RMB) to aim down sights. TOGGLE: Click once to zoom with precision holographic reticle; click again to return to hipfire.')" onblur="HUD.hideTooltip()">?</button></span>
+              <span id="val-ads-mode" class="pm-val-badge">HOLD</span>
+            </div>
+            <div class="pm-btn-group">
+              <button class="pm-opt-btn active" id="btn-ads-hold" type="button" onclick="HUD.onSettingChange('adsToggle', false)">
+                <span class="pm-opt-main">HOLD</span>
+                <span class="pm-opt-sub">Standard RMB</span>
+              </button>
+              <button class="pm-opt-btn" id="btn-ads-toggle" type="button" onclick="HUD.onSettingChange('adsToggle', true)">
+                <span class="pm-opt-main">TOGGLE</span>
+                <span class="pm-opt-sub">Click to Aim</span>
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Interactive Keybinding Remapper Grid -->
+        <div class="pm-keybinds-container">
+          <div class="pm-binds-header">
+            <div class="pm-binds-title">
+              <span class="pm-lbl-left"><span>TACTICAL KEY ASSIGNMENTS</span><button type="button" class="pm-help" onmouseenter="HUD.showTooltip(this, 'KEY ASSIGNMENTS', 'Click any key slot to enter capture mode, then press the desired keyboard key to bind. Press ESC to cancel rebinding.')" onmouseleave="HUD.hideTooltip()" onfocus="HUD.showTooltip(this, 'KEY ASSIGNMENTS', 'Click any key slot to enter capture mode, then press the desired keyboard key to bind. Press ESC to cancel rebinding.')" onblur="HUD.hideTooltip()">?</button></span>
+              <span class="pm-binds-help">Click any key slot below to rebind. Press ESC to cancel.</span>
+            </div>
+            <div style="display:inline-flex;align-items:center;gap:6px;">
+              <button class="pm-btn-sm" type="button" onclick="HUD.resetKeybindings()">RESET DEFAULT KEYS</button>
+              <button type="button" class="pm-help" onmouseenter="HUD.showTooltip(this, 'RESET CONTROLS', 'Reverts all movement and vehicle driving key assignments back to factory default keyboard layout (WASD, Space, Shift).')" onmouseleave="HUD.hideTooltip()" onfocus="HUD.showTooltip(this, 'RESET CONTROLS', 'Reverts all movement and vehicle driving key assignments back to factory default keyboard layout (WASD, Space, Shift).')" onblur="HUD.hideTooltip()">?</button>
+            </div>
+          </div>
+
+          <div class="pm-binds-grid" id="pm-binds-grid">
+            <!-- Dynamically populated by HUD.renderKeybindings() -->
+          </div>
+        </div>
+      </div>
+
+      <!-- TAB 3: TELEMETRY & HARDWARE -->
+      <div class="pm-pane" id="pm-pane-sys">
+        <div class="pm-sys-grid">
+          <div class="pm-card">
+            <div class="pm-card-header">
+              <div style="display:inline-flex;align-items:center;gap:8px;">
+                <span class="pm-card-icon">💻</span>
+                <span class="pm-card-title">GPU & DISPLAY TELEMETRY</span>
+              </div>
+              <button type="button" class="pm-help" onmouseenter="HUD.showTooltip(this, 'GPU TELEMETRY', 'Live real-time diagnostics monitoring WebGL display resolution, active framebuffer size, device pixel ratio, and fill-rate savings.')" onmouseleave="HUD.hideTooltip()" onfocus="HUD.showTooltip(this, 'GPU TELEMETRY', 'Live real-time diagnostics monitoring WebGL display resolution, active framebuffer size, device pixel ratio, and fill-rate savings.')" onblur="HUD.hideTooltip()">?</button>
+            </div>
+            <div class="pm-stat-row">
+              <span class="pm-stat-name">Viewport Window:</span>
+              <span class="pm-stat-val" id="pm-diag-win">1920 &times; 1080</span>
+            </div>
+            <div class="pm-stat-row">
+              <span class="pm-stat-name">Hardware Pixel Ratio:</span>
+              <span class="pm-stat-val" id="pm-diag-dpr">1.25x</span>
+            </div>
+            <div class="pm-stat-row">
+              <span class="pm-stat-name">Active Render Buffer:</span>
+              <span class="pm-stat-val" id="pm-diag-buffer">1920 &times; 1080</span>
+            </div>
+            <div class="pm-stat-row">
+              <span class="pm-stat-name">WebGL Power Preference:</span>
+              <span class="pm-stat-val">high-performance</span>
+            </div>
+            <div class="pm-stat-row">
+              <span class="pm-stat-name">Fill-Rate Saving:</span>
+              <span class="pm-stat-val pm-cyan-text" id="pm-diag-savings">Native (100% Quality)</span>
+            </div>
+          </div>
+
+          <div class="pm-card">
+            <div class="pm-card-header">
+              <div style="display:inline-flex;align-items:center;gap:8px;">
+                <span class="pm-card-icon">🧠</span>
+                <span class="pm-card-title">VESPERA RUNTIME STATS</span>
+              </div>
+              <button type="button" class="pm-help" onmouseenter="HUD.showTooltip(this, 'RUNTIME ENGINE', 'Real-time performance metrics tracking active vehicle physics, zombie AI count, spatial collider octrees, and Web Audio API status.')" onmouseleave="HUD.hideTooltip()" onfocus="HUD.showTooltip(this, 'RUNTIME ENGINE', 'Real-time performance metrics tracking active vehicle physics, zombie AI count, spatial collider octrees, and Web Audio API status.')" onblur="HUD.hideTooltip()">?</button>
+            </div>
+            <div class="pm-stat-row">
+              <span class="pm-stat-name">Active Cars Simulated:</span>
+              <span class="pm-stat-val" id="pm-diag-cars">2 Vehicles</span>
+            </div>
+            <div class="pm-stat-row">
+              <span class="pm-stat-name">Zombies in Quarantine:</span>
+              <span class="pm-stat-val" id="pm-diag-zombies">0 Hostiles</span>
+            </div>
+            <div class="pm-stat-row">
+              <span class="pm-stat-name">World Colliders Cached:</span>
+              <span class="pm-stat-val" id="pm-diag-colls">0 Colliders</span>
+            </div>
+            <div class="pm-stat-row">
+              <span class="pm-stat-name">Web Audio Graph:</span>
+              <span class="pm-stat-val pm-cyan-text" id="pm-diag-audio">Operational (Active)</span>
+            </div>
+            <div class="pm-stat-row">
+              <span class="pm-stat-name">Settings Persistence:</span>
+              <span class="pm-stat-val pm-cyan-text">localStorage Synchronized</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="pm-sys-actions">
+          <div style="display:inline-flex;align-items:center;gap:8px;">
+            <button class="pm-btn-danger-outline" type="button" onclick="HUD.resetAllSettings()">
+              FACTORY RESET ALL SETTINGS
+            </button>
+            <button type="button" class="pm-help" onmouseenter="HUD.showTooltip(this, 'FACTORY RESET', 'Clears localStorage settings cache and restores default graphics scale (100%), audio volumes (70%), ADS mode (HOLD), and keybindings.')" onmouseleave="HUD.hideTooltip()" onfocus="HUD.showTooltip(this, 'FACTORY RESET', 'Clears localStorage settings cache and restores default graphics scale (100%), audio volumes (70%), ADS mode (HOLD), and keybindings.')" onblur="HUD.hideTooltip()">?</button>
+          </div>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- Footer Bar -->
+    <div class="pm-footer">
+      <div class="pm-footer-left">
+        <span class="pm-esc-hint"><kbd>ESC</kbd> QUICK RESUME</span>
+      </div>
+      <div class="pm-footer-right">
+        <button class="pm-btn pm-btn-respawn" type="button" onclick="HUD.togglePause(); Player.respawn();">
+          RESPAWN AT BOULEVARD
+        </button>
+        <button class="pm-btn pm-btn-resume" type="button" onclick="HUD.togglePause()">
+          RESUME MISSION
+        </button>
+      </div>
+    </div>
+
+    <!-- Dynamic Floating Telemetry Tooltip -->
+    <div id="pm-tooltip" class="pm-floating-tooltip" style="display:none;"></div>
+  </div>
+</div>
+
+<!-- Gunsmith Workbench Modal -->
+<div id="workbench-modal" style="display:none;">
+  <div id="workbench-box">
+    <div class="wb-header">
+      <div class="wb-title-wrap">
+        <h2>🛠️ GUNSMITH WORKBENCH</h2>
+        <div class="wb-sub">TACTICAL MODIFICATION & BALLISTIC UPGRADES</div>
+      </div>
+      <div class="wb-scrap-info">
+        <span class="wb-scrap-label">AVAILABLE SCRAP:</span>
+        <span class="scrap-icon">🔩</span> <span id="wb-scrap-num">30</span>
+      </div>
+      <button id="wb-close" class="wb-close-btn" onclick="Safehouse.closeWorkbench()">&times;</button>
+    </div>
+    <div class="wb-weapon-summary">
+      <div class="wb-gun-title">ACR 6.8 SPC SUPPRESSED</div>
+      <div class="wb-gun-desc">Tactical suppressed modular carbine. Subsonic gas porting, reflex optics, precision barrel.</div>
+    </div>
+    <div class="wb-upgrades-grid">
+      <div class="wb-card">
+        <div class="wb-card-title">EXTENDED MAGAZINE</div>
+        <div class="wb-card-desc">Expanded 45-round polymer PMAG. Essential sustained firepower for horde defense.</div>
+        <div class="wb-card-stat">+15 Rounds Capacity (30 &rarr; 45)</div>
+        <button class="wb-upgrade-btn" id="wb-btn-extendedMag" onclick="Safehouse.buyUpgrade('extendedMag')">INSTALL (45 SCRAP)</button>
+      </div>
+      <div class="wb-card">
+        <div class="wb-card-title">TUNED COMPENSATOR</div>
+        <div class="wb-card-desc">Baffled recoil brake & tuned gas piston buffer. Minimizes muzzle rise and tightens spread.</div>
+        <div class="wb-card-stat">-40% Recoil Kick & Spread</div>
+        <button class="wb-upgrade-btn" id="wb-btn-compensator" onclick="Safehouse.buyUpgrade('compensator')">INSTALL (60 SCRAP)</button>
+      </div>
+      <div class="wb-card">
+        <div class="wb-card-title">TUNGSTEN AP ROUNDS</div>
+        <div class="wb-card-desc">High-density armor-piercing core cartridges. Decimates Brute armor and infected skulls.</div>
+        <div class="wb-card-stat">+35% Bullet Damage (28 &rarr; 38)</div>
+        <button class="wb-upgrade-btn" id="wb-btn-apRounds" onclick="Safehouse.buyUpgrade('apRounds')">INSTALL (80 SCRAP)</button>
+      </div>
+      <div class="wb-card">
+        <div class="wb-card-title">MATCH-GRADE BOLT</div>
+        <div class="wb-card-desc">Skeletonized titanium carrier with high-rate buffer spring for faster cyclic action.</div>
+        <div class="wb-card-stat">+22% Faster Fire Rate</div>
+        <button class="wb-upgrade-btn" id="wb-btn-tunedBolt" onclick="Safehouse.buyUpgrade('tunedBolt')">INSTALL (100 SCRAP)</button>
+      </div>
+    </div>
+  </div>
+<!-- City Extraction & Mission Debriefing Modal -->
+<div id="extraction-modal" style="display:none;">
+  <div id="extraction-box">
+    <div class="ext-header">
+      <div class="ext-title-wrap">
+        <h2>🎖️ SECTOR EVACUATION SUCCESSFUL</h2>
+        <div class="ext-sub">TACTICAL REPORT · ARMORED CONVOY EXTRACTED</div>
+      </div>
+    </div>
+    <div class="ext-stats-grid">
+      <div class="ext-stat-card">
+        <div class="ext-stat-label">SURVIVAL TIME</div>
+        <div id="deb-surv-time" class="ext-stat-val">12m 45s</div>
+      </div>
+      <div class="ext-stat-card">
+        <div class="ext-stat-label">INFECTED KILLS</div>
+        <div id="deb-kills" class="ext-stat-val">38</div>
+      </div>
+      <div class="ext-stat-card">
+        <div class="ext-stat-label">MUTATIONS DEFEATED</div>
+        <div id="deb-mutants" class="ext-stat-val">9</div>
+      </div>
+      <div class="ext-stat-card">
+        <div class="ext-stat-label">CRITICAL HEADSHOTS</div>
+        <div id="deb-headshots" class="ext-stat-val">18</div>
+      </div>
+      <div class="ext-stat-card">
+        <div class="ext-stat-label">SCRAP SALVAGED</div>
+        <div id="deb-scrap" class="ext-stat-val">185</div>
+      </div>
+    </div>
+    <div class="ext-radio-debrief">
+      <div class="ext-radio-speaker">📻 MAJOR VANCE — EVAC COMMAND</div>
+      <div class="ext-radio-msg">"Convoy breached the perimeter gate. You held that relay against every abomination in the district. City Command confirms sector quarantine hold. What are your orders, survivor?"</div>
+    </div>
+    <div class="ext-footer">
+      <button class="ext-btn ext-btn-continue" onclick="Extraction.continueFreeRoam()">CONTINUE FREE ROAM NIGHTMARE (+150 Scrap)</button>
+      <button class="ext-btn ext-btn-restart" onclick="location.reload()">REPLAY MISSION</button>
+    </div>
+  </div>
+</div>
+
+<script src="libs/three.min.js"></script>
+<script src="libs/GLTFLoader.js"></script>
+<script src="libs/SkeletonUtils.js"></script>
+<script src="libs/BufferGeometryUtils.js"></script>
+<script src="js/utils.js?v=8"></script>
+<script src="js/preloader.js?v=1"></script>
+<script src="js/audio.js?v=23"></script>
+<script src="js/world.js?v=10"></script>
+<script src="js/cars.js?v=18"></script>
+<script src="js/weaponvisual.js?v=14"></script>
+<script src="js/weapons.js?v=92"></script>
+<script src="js/zombievisual.js?v=5"></script>
+<script src="js/thugvisual.js?v=5"></script>
+<script src="js/enemies.js?v=23"></script>
+<script src="js/safehouse.js?v=9"></script>
+<script src="js/scavenging.js?v=1"></script>
+<script src="js/daynight.js?v=6"></script>
+<script src="js/weather.js?v=4"></script>
+<script src="js/hud.js?v=23"></script>
+<script src="js/touch.js"></script>
+<script src="js/extraction.js?v=1"></script>
+<script src="js/objectives.js?v=2"></script>
+<script src="js/playercharacter.js?v=3"></script>
+<script src="js/player.js?v=25"></script>
+<script src="js/main.js?v=24"></script>
+</body>
+</html>

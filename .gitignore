@@ -1,0 +1,17 @@
+# Logs and temporary files
+server.log
+*.log
+
+# Scratch and internal agent files
+scratch/
+.agents/
+
+# Editor and OS files
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db
+
+# Python bytecode
+__pycache__/
+*.py[cod]

@@ -1,0 +1,355 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Vespera — Mercedes Car Audio Audition Studio</title>
+<style>
+  :root {
+    --bg: #0d0f13;
+    --card: #151921;
+    --card-border: #232a38;
+    --accent-amg: #00d2be; /* Mercedes Petronas / AMG Cyan */
+    --accent-demon: #ff3344;
+    --text: #e6edf3;
+    --text-dim: #8b949e;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    padding: 30px 20px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+  }
+  h1 { font-size: 26px; margin-bottom: 6px; letter-spacing: -0.5px; }
+  .subtitle { color: var(--text-dim); font-size: 14px; margin-bottom: 25px; text-align: center; max-width: 650px; }
+  .grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+    gap: 20px;
+    width: 100%;
+    max-width: 1080px;
+    margin-bottom: 25px;
+  }
+  .card {
+    background: var(--card);
+    border: 1px solid var(--card-border);
+    border-radius: 12px;
+    padding: 20px;
+    position: relative;
+    transition: transform 0.15s, border-color 0.15s;
+  }
+  .card.active {
+    border-color: var(--accent-amg);
+    box-shadow: 0 0 16px rgba(0, 210, 190, 0.25);
+  }
+  .card.demon.active {
+    border-color: var(--accent-demon);
+    box-shadow: 0 0 16px rgba(255, 51, 68, 0.25);
+  }
+  .tag {
+    font-size: 10px;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    font-weight: 700;
+    padding: 3px 8px;
+    border-radius: 4px;
+    display: inline-block;
+    margin-bottom: 10px;
+  }
+  .tag-amg { background: rgba(0, 210, 190, 0.15); color: var(--accent-amg); }
+  .tag-demon { background: rgba(255, 51, 68, 0.15); color: var(--accent-demon); }
+  .tag-old { background: rgba(255, 180, 0, 0.15); color: #ffb400; }
+  .card-title { font-size: 18px; font-weight: 600; margin-bottom: 6px; }
+  .card-desc { font-size: 13px; color: var(--text-dim); line-height: 1.4; margin-bottom: 15px; }
+  .btn-group { display: flex; gap: 8px; flex-wrap: wrap; }
+  button {
+    background: #212836;
+    color: var(--text);
+    border: 1px solid #303b4e;
+    padding: 8px 14px;
+    border-radius: 6px;
+    font-size: 13px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background 0.15s, color 0.15s;
+  }
+  button:hover { background: #2d374a; }
+  button.btn-primary { background: var(--accent-amg); color: #081116; border-color: var(--accent-amg); }
+  button.btn-primary:hover { background: #33e1d1; }
+  button.btn-stop { background: #3a1e24; color: #ff6677; border-color: #55252e; }
+  button.btn-stop:hover { background: #4a242c; }
+
+  /* Controls Panel */
+  .control-panel {
+    background: var(--card);
+    border: 1px solid var(--card-border);
+    border-radius: 12px;
+    padding: 20px;
+    width: 100%;
+    max-width: 1080px;
+    margin-bottom: 25px;
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+  }
+  .slider-row {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+  }
+  .slider-label { width: 140px; font-size: 14px; font-weight: 600; }
+  input[type=range] {
+    flex: 1;
+    accent-color: var(--accent-amg);
+    cursor: pointer;
+  }
+  .slider-val { width: 60px; text-align: right; font-family: monospace; font-size: 14px; }
+  canvas {
+    width: 100%;
+    height: 100px;
+    background: #090b0e;
+    border-radius: 6px;
+    border: 1px solid #1a202c;
+  }
+  .status-bar {
+    font-size: 13px;
+    color: var(--accent-amg);
+    font-family: monospace;
+    min-height: 20px;
+  }
+</style>
+</head>
+<body>
+
+<h1>🏎️ Vespera — Mercedes-Benz Sound Audition Studio</h1>
+<p class="subtitle">A/B Testing & Sound Comparison for Mercedes-AMG ONE vs Dodge Challenger SRT Demon. Sourced from authentic Mercedes-AMG 4.0L BiTurbo V8 engines.</p>
+
+<div class="control-panel">
+  <div class="slider-row">
+    <span class="slider-label">RPM Modulation:</span>
+    <input type="range" id="rpmSlider" min="0" max="1" step="0.01" value="0">
+    <span class="slider-val" id="rpmVal">0% (Idle)</span>
+  </div>
+  <div class="slider-row">
+    <span class="slider-label">Master Volume:</span>
+    <input type="range" id="volSlider" min="0" max="1" step="0.01" value="0.75">
+    <span class="slider-val" id="volVal">75%</span>
+  </div>
+  <canvas id="vizCanvas"></canvas>
+  <div class="status-bar" id="statusBar">Ready. Click any loop or ignition button to preview.</div>
+</div>
+
+<div class="grid">
+  <!-- Reference: Dodge Challenger -->
+  <div class="card demon" id="card-demon">
+    <span class="tag tag-demon">Reference (Approved)</span>
+    <div class="card-title">Dodge Challenger SRT Demon</div>
+    <div class="card-desc">Authentic American V8 Muscle. 120Hz bass-boosted rumble, smooth, zero harshness, approved by user.</div>
+    <div class="btn-group">
+      <button class="btn-primary" onclick="playEngine('audio/engine_demon.mp3', 'card-demon', 'Dodge Challenger SRT Demon')">Play Loop</button>
+      <button onclick="playStart('audio/engine_start_demon.mp3', 'Dodge Demon Starter')">Ignition</button>
+      <button class="btn-stop" onclick="stopEngine()">Stop</button>
+    </div>
+  </div>
+
+  <!-- Candidate 1: E63 BiTurbo Pull -->
+  <div class="card" id="card-cand1">
+    <span class="tag tag-amg">Candidate 1 (Recommended)</span>
+    <div class="card-title">Mercedes-AMG E63 S Throaty Pull</div>
+    <div class="card-desc">Authentic 4.0L Hot-V BiTurbo V8. 79Hz fundamental, 71% deep low-end body, warm, authoritative, zero harshness.</div>
+    <div class="btn-group">
+      <button class="btn-primary" onclick="playEngine('audio/test_amg_cand1.mp3', 'card-cand1', 'Mercedes-AMG Candidate 1 (E63 Throaty Pull)')">Play Loop</button>
+      <button onclick="playStart('audio/test_start_cand1.mp3', 'AMG GT R Starter')">Ignition A</button>
+      <button onclick="playStart('audio/test_start_cand2.mp3', 'E63 Starter')">Ignition B</button>
+      <button class="btn-stop" onclick="stopEngine()">Stop</button>
+    </div>
+  </div>
+
+  <!-- Candidate 2: E63 Heavy Growl -->
+  <div class="card" id="card-cand2">
+    <span class="tag tag-amg">Candidate 2 (Heavy Growl)</span>
+    <div class="card-title">Mercedes-AMG E63 S Heavy BiTurbo</div>
+    <div class="card-desc">Deep 70Hz low-end thunder. Maximum bass punch, quintessential deep AMG mechanical burble & growl.</div>
+    <div class="btn-group">
+      <button class="btn-primary" onclick="playEngine('audio/test_amg_cand2.mp3', 'card-cand2', 'Mercedes-AMG Candidate 2 (E63 Heavy Growl)')">Play Loop</button>
+      <button onclick="playStart('audio/test_start_cand1.mp3', 'AMG GT R Starter')">Ignition A</button>
+      <button onclick="playStart('audio/test_start_cand2.mp3', 'E63 Starter')">Ignition B</button>
+      <button class="btn-stop" onclick="stopEngine()">Stop</button>
+    </div>
+  </div>
+
+  <!-- Candidate 3: AMG GT R Track -->
+  <div class="card" id="card-cand3">
+    <span class="tag tag-amg">Candidate 3 (Track Roar)</span>
+    <div class="card-title">Mercedes-AMG GT R Track Beast</div>
+    <div class="card-desc">From the AMG GT R (M178). Aggressive, racing exhaust with authentic bark and high-revving German racecraft.</div>
+    <div class="btn-group">
+      <button class="btn-primary" onclick="playEngine('audio/test_amg_cand3.mp3', 'card-cand3', 'Mercedes-AMG Candidate 3 (GT R Track)')">Play Loop</button>
+      <button onclick="playStart('audio/test_start_cand1.mp3', 'AMG GT R Starter')">Ignition A</button>
+      <button class="btn-stop" onclick="stopEngine()">Stop</button>
+    </div>
+  </div>
+
+  <!-- Old Sound: Lexus LFA (For Comparison) -->
+  <div class="card" id="card-old">
+    <span class="tag tag-old">Previous (User Rejected)</span>
+    <div class="card-title">Previous "Shit" Sound</div>
+    <div class="card-desc">The previous sound in engine_amg.mp3 (Lexus LFA V10 filtered). High-pitched, artificial, unfitting for Mercedes.</div>
+    <div class="btn-group">
+      <button onclick="playEngine('audio/engine_amg.mp3', 'card-old', 'Previous Sound (Rejected)')">Play Old Sound</button>
+      <button class="btn-stop" onclick="stopEngine()">Stop</button>
+    </div>
+  </div>
+</div>
+
+<script>
+  var audioCtx = null;
+  var currentSource = null;
+  var currentGain = null;
+  var analyser = null;
+  var currentCardId = null;
+  var currentRpm = 0;
+  var currentBaseRate = 0.88;
+  var currentMaxRate = 1.36;
+
+  function initAudio() {
+    if (!audioCtx) {
+      audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+      analyser = audioCtx.createAnalyser();
+      analyser.fftSize = 512;
+      analyser.connect(audioCtx.destination);
+      drawViz();
+    }
+    if (audioCtx.state === 'suspended') {
+      audioCtx.resume();
+    }
+  }
+
+  function playEngine(url, cardId, title) {
+    initAudio();
+    stopEngine();
+
+    fetch(url)
+      .then(res => res.arrayBuffer())
+      .then(buf => audioCtx.decodeAudioData(buf))
+      .then(decoded => {
+        var src = audioCtx.createBufferSource();
+        src.buffer = decoded;
+        src.loop = true;
+
+        var gain = audioCtx.createGain();
+        var vol = parseFloat(document.getElementById('volSlider').value);
+        gain.gain.value = vol * (0.35 + currentRpm * 0.4);
+
+        var rate = currentBaseRate + currentRpm * (currentMaxRate - currentBaseRate);
+        src.playbackRate.value = rate;
+
+        src.connect(gain);
+        gain.connect(analyser);
+        src.start(0);
+
+        currentSource = src;
+        currentGain = gain;
+        currentCardId = cardId;
+
+        document.querySelectorAll('.card').forEach(c => c.classList.remove('active'));
+        if (cardId) document.getElementById(cardId).classList.add('active');
+
+        document.getElementById('statusBar').innerText = 'Playing loop: ' + title + ' @ ' + (rate.toFixed(2)) + 'x rate';
+      })
+      .catch(err => {
+        document.getElementById('statusBar').innerText = 'Error loading audio: ' + err;
+      });
+  }
+
+  function playStart(url, title) {
+    initAudio();
+    fetch(url)
+      .then(res => res.arrayBuffer())
+      .then(buf => audioCtx.decodeAudioData(buf))
+      .then(decoded => {
+        var src = audioCtx.createBufferSource();
+        src.buffer = decoded;
+        var gain = audioCtx.createGain();
+        var vol = parseFloat(document.getElementById('volSlider').value);
+        gain.gain.value = vol * 0.85;
+        src.connect(gain);
+        gain.connect(analyser);
+        src.start(0);
+        document.getElementById('statusBar').innerText = 'Ignition: ' + title;
+      });
+  }
+
+  function stopEngine() {
+    if (currentSource) {
+      try {
+        currentSource.stop();
+        currentSource.disconnect();
+      } catch(e) {}
+      currentSource = null;
+    }
+    if (currentGain) {
+      try { currentGain.disconnect(); } catch(e) {}
+      currentGain = null;
+    }
+    document.querySelectorAll('.card').forEach(c => c.classList.remove('active'));
+    document.getElementById('statusBar').innerText = 'Engine stopped.';
+  }
+
+  // Slider events
+  document.getElementById('rpmSlider').addEventListener('input', function(e) {
+    currentRpm = parseFloat(e.target.value);
+    var pct = Math.round(currentRpm * 100);
+    document.getElementById('rpmVal').innerText = pct + '% ' + (pct === 0 ? '(Idle)' : (pct > 80 ? '(Redline)' : '(Cruising)'));
+
+    if (currentSource && audioCtx) {
+      var rate = currentBaseRate + currentRpm * (currentMaxRate - currentBaseRate);
+      currentSource.playbackRate.setTargetAtTime(rate, audioCtx.currentTime, 0.05);
+      var vol = parseFloat(document.getElementById('volSlider').value);
+      currentGain.gain.setTargetAtTime(vol * (0.35 + currentRpm * 0.4), audioCtx.currentTime, 0.05);
+      document.getElementById('statusBar').innerText = 'RPM modulated: ' + (rate.toFixed(2)) + 'x rate';
+    }
+  });
+
+  document.getElementById('volSlider').addEventListener('input', function(e) {
+    var v = parseFloat(e.target.value);
+    document.getElementById('volVal').innerText = Math.round(v * 100) + '%';
+    if (currentGain && audioCtx) {
+      currentGain.gain.setTargetAtTime(v * (0.35 + currentRpm * 0.4), audioCtx.currentTime, 0.05);
+    }
+  });
+
+  // Visualizer
+  function drawViz() {
+    requestAnimationFrame(drawViz);
+    if (!analyser) return;
+    var canvas = document.getElementById('vizCanvas');
+    var ctx = canvas.getContext('2d');
+    var width = canvas.width = canvas.offsetWidth;
+    var height = canvas.height = canvas.offsetHeight;
+
+    var data = new Uint8Array(analyser.frequencyBinCount);
+    analyser.getByteFrequencyData(data);
+
+    ctx.fillStyle = '#090b0e';
+    ctx.fillRect(0, 0, width, height);
+
+    var barWidth = (width / data.length) * 2.2;
+    var x = 0;
+    for (var i = 0; i < data.length; i++) {
+      var barHeight = (data[i] / 255) * height;
+      var hue = 175 + (i / data.length) * 40;
+      ctx.fillStyle = 'hsl(' + hue + ', 85%, ' + (25 + data[i] / 5) + '%)';
+      ctx.fillRect(x, height - barHeight, barWidth - 1, barHeight);
+      x += barWidth;
+      if (x > width) break;
+    }
+  }
+</script>
+
+</body>
+</html>

@@ -1,0 +1,14 @@
+log: [VESPERA] ThugVisual ready. Clips: walk,idle,shoot,idleGun
+log: [VESPERA] ZombieVisual ready. Clips: bite,crawl,idle,run,walk
+log: [VESPERA] WeaponVisual ready. Muzzle at -0.009 0.058 -0.538
+error: Failed to load resource: the server responded with a status of 404 (File not found)
+log: [VESPERA] ArmsVisual ready. Clips: idle,walk,run,fire,reload,draw,inspect size: 66.404 121.106 38.581
+log: [VESPERA] animated arms attached, Idle playing, frame k = 0.00644 size= 66.40 121.11 38.58
+start-click: ENTER VESPERA
+WeaponVisual.ready: true
+STATE {"muzzle":{"x":-0.009,"y":0.058,"z":-0.538},"glbBoxMin":{"x":-157.653,"y":1.242,"z":-157.868},"glbBoxMax":{"x":-156.94,"y":1.482,"z":-157.486},"glbInModel":true,"modelChildCount":3,"flashParentIsModel":true,"flashPos":{"x":-0.009,"y":0.058,"z":-0.538},"modelPos":{"x":0.32,"y":-0.338,"z":-0.549},"tris":1988,"meshCount":5}
+FIRE {"magBefore":30,"magAfter":29,"kick":1,"flashVisible":true,"flashZ":-0.538}
+RELOAD {"reloading":1.6}
+error: Failed to load resource: the server responded with a status of 404 (File not found)
+WALK {"bobAmount":0.98,"walkPhase":5.26,"pos":{"x":-159.23,"z":-159.23}}
+SPRINT {"sprintAmount":0.95}
