@@ -1,14 +1,17 @@
 # VESPERA — Zombie Survival FPS Game
 
 > **VESPERA** is a high-octane 3D zombie-survival GTA-style FPS game built with Vanilla JavaScript, HTML5, CSS, and Three.js (r128). No build steps or bundlers required.
-> Served locally at `http://localhost:8471` (run `python -m http.server 8471` from `vespera/` or run `play.bat`).
+>
+> - 🌐 **Play Online (Live Web Demo):** [https://vesperalabs.github.io/OutState/](https://vesperalabs.github.io/OutState/)
+> - 📦 **GitHub Repository:** [https://github.com/VesperaLabs/OutState](https://github.com/VesperaLabs/OutState)
+> - 💻 **Local Development:** `http://localhost:8471` (run `python -m http.server 8471` from `vespera/` or run `play.bat`).
 
 ---
 
 ## 🚀 How to Start the Next Session (Paste Verbatim)
 ```
 Read vespera/PROJECT.md and continue development on VESPERA.
-Previous phases completed: Modular FPS viewmodels (Assault Rifle, Remington 870 Shotgun, .357 Magnum), ADS with holographic aim reticle, dual fire (LMB/X), tactical audio, shell ejection, tracers, locational headshots (2.5x), hitmarkers, 6 infected archetypes (Walkers, Sprinters, Crawlers, Brutes, Spitters, Stalkers), horde wave escalation & rewards, luminous loot crates, roadkill ragdoll physics, drift physics, destructible props, enterable safehouse with barricades, ammo cache, gunsmith upgrade workbench & scrap economy, scavenging system, dynamic weather, settings & pause menu, distress beacon siege, relay extraction finale, 3D vehicles (Mercedes-AMG ONE & Dodge Challenger SRT Demon with 84% VRAM texture compression), 100% transparent motorsport racing gauge cluster with calibrated road-speed needle, 4 dynamic vehicle camera perspectives (Chase, Close, Hood, Far), 60 FPS WebGL optimizations, Mounted Vehicle Gunner / Drive-by Shooting (360° vehicle aim, ADS zoom, tactical vehicular reticle, window muzzle flash & shell ejection, in-car weapon telemetry, driving reload & weapon cycle), 100% transparent pure white high-contrast ammo counter & bullet tick animation (clearly visible in both daytime and nighttime with zero dark voids), and 60 FPS dynamic rotating tactical minimap with compass tracking.
+Previous phases completed: Modular FPS viewmodels (Assault Rifle, Remington 870 Shotgun, .357 Magnum), ADS with holographic aim reticle, dual fire (LMB/X), tactical audio, shell ejection, tracers, locational headshots (2.5x), hitmarkers, 6 infected archetypes (Walkers, Sprinters, Crawlers, Brutes, Spitters, Stalkers), horde wave escalation & rewards, luminous loot crates, roadkill ragdoll physics, drift physics, destructible props, enterable safehouse with barricades, ammo cache, gunsmith upgrade workbench & scrap economy, scavenging system, dynamic weather, settings & pause menu, distress beacon siege, relay extraction finale, 3D vehicles (Mercedes-AMG ONE & Dodge Challenger SRT Demon with 84% VRAM texture compression), 100% transparent motorsport racing gauge cluster with calibrated road-speed needle, 4 dynamic vehicle camera perspectives (Chase, Close, Hood, Far), 60 FPS WebGL optimizations, Mounted Vehicle Gunner / Drive-by Shooting (360° vehicle aim, ADS zoom, tactical vehicular reticle, window muzzle flash & shell ejection, in-car weapon telemetry, driving reload & weapon cycle), 100% transparent pure white high-contrast ammo counter & bullet tick animation (clearly visible in both daytime and nighttime with zero dark voids), 60 FPS dynamic rotating tactical minimap with compass tracking, and Production Web Deployment & GitHub Pages release (https://vesperalabs.github.io/OutState/).
 
 CURRENT IMMEDIATE TASK:
 Next High-Impact Milestone:
@@ -142,6 +145,12 @@ Next High-Impact Milestone:
   - **Curbside Parked Car Restructuring:** Distributed 18 high-fidelity curbside parked cars along avenues with frozen static matrices, replacing 108 redundant procedural car meshes.
   - **Zero-Allocation Collision (`collideWorld`):** Reused static `_colWorldResult` object, preventing 100+ GC object allocations per frame.
   - **Slow-Motion Removal:** Restored true 60 FPS frame time (16.6ms), eliminating the delta time clamping lag.
+- [x] **Web Deployment & GitHub Pages Production Release:** (COMPLETED)
+  - **Live Web Production Release:** Successfully deployed zero-build web release to GitHub Pages at [https://vesperalabs.github.io/OutState/](https://vesperalabs.github.io/OutState/).
+  - **Git Remote & Version Control:** Cleanly initialized Git repository connected to [https://github.com/VesperaLabs/OutState](https://github.com/VesperaLabs/OutState) tracking `main`.
+  - **Production `.gitignore`:** Added strict exclusions for server runtime logs, Python cache bytecode, and IDE agent files.
+  - **Relative Path Auditing:** Verified 100% relative path compatibility (`assets/...`, `libs/...`, `js/...`, `css/...`) across all 108 game assets (audio, 3D GLB vehicles, weapons, characters, environment).
+  - **Real-World Web Validation:** Overcomes browser CORS restrictions, activates proper PointerLock controls, unlocks Web Audio Context permissions over HTTPS, and delivers full cross-device playability on PC, laptops, and mobile touch devices.
 
 ---
 

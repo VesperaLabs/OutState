@@ -2,10 +2,18 @@
 
 VESPERA is a high-octane 3D zombie-survival GTA-style FPS game built with Vanilla JavaScript, HTML5, CSS, and Three.js (r128). No build steps or bundlers required.
 
+🌐 **Play Online (Live Web Demo):** [https://vesperalabs.github.io/OutState/](https://vesperalabs.github.io/OutState/)  
+📦 **GitHub Repository:** [https://github.com/VesperaLabs/OutState](https://github.com/VesperaLabs/OutState)
+
 ---
 
 ## ⚡ Quick Start
 
+### Option 1: Play Instantly Online
+No installation required! Just click and play in any modern WebGL browser:  
+👉 **[https://vesperalabs.github.io/OutState/](https://vesperalabs.github.io/OutState/)**
+
+### Option 2: Run Locally
 1. Start a local HTTP server inside the `vespera` directory:
    ```bash
    python -m http.server 8471
