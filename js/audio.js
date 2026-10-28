@@ -180,6 +180,10 @@ var AudioSys = {
     var self = this;
     for (var key in files){
       (function(k, url){
+        var mgr = (typeof THREE !== 'undefined' && THREE.DefaultLoadingManager) ? THREE.DefaultLoadingManager : null;
+        if (mgr && mgr.itemStart) {
+          try { mgr.itemStart(url); } catch(e){}
+        }
         fetch(url)
           .then(function(res){
             if (!res.ok) throw new Error('HTTP ' + res.status);
@@ -190,10 +194,16 @@ var AudioSys = {
           })
           .then(function(audioBuf){
             self.buffers[k] = audioBuf;
-            console.log('[VESPERA Audio] Loaded audio file:', k);
+            console.log('[VESPERA Audio] Loaded studio audio file:', k);
+            if (mgr && mgr.itemEnd) {
+              try { mgr.itemEnd(url); } catch(e){}
+            }
           })
           .catch(function(err){
-            // Fallback stays active silently
+            console.warn('[VESPERA Audio] Audio stream fallback active for:', k, err);
+            if (mgr && mgr.itemError) {
+              try { mgr.itemError(url); } catch(e){}
+            }
           });
       })(key, files[key]);
     }

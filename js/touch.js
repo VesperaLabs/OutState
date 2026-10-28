@@ -58,5 +58,22 @@ var Touch = {
     bindBtn('btn-reload', function(){ Weapons.reload(); });
     bindBtn('btn-sprint', function(){ G.player.sprint = !G.player.sprint;
       document.getElementById('btn-sprint').classList.toggle('on', G.player.sprint); });
+    
+    var stageBtn = document.getElementById('btn-stage-rev');
+    if (stageBtn){
+      bindBtn('btn-stage-rev', function(){ G.keys['KeyZ'] = true; }, function(){ G.keys['KeyZ'] = false; });
+    }
+
+    var fsBtn = document.getElementById('btn-mobile-fs');
+    if (fsBtn){
+      fsBtn.addEventListener('click', function(e){
+        e.preventDefault();
+        if (window.enterMobileLandscape) window.enterMobileLandscape();
+      });
+      fsBtn.addEventListener('touchstart', function(e){
+        e.preventDefault();
+        if (window.enterMobileLandscape) window.enterMobileLandscape();
+      });
+    }
   }
 };

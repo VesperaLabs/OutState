@@ -138,6 +138,15 @@ Next High-Impact Milestone:
   - **60 FPS Continuous Smoothness:** Minimap updates every frame without throttled stepping, ensuring fluid, jitter-free rotation alongside mouse aim.
   - **Zero-Allocation Raycast Ballistics:** Eradicated GC hitches during combat by replacing temporary Vector3 allocations in `raycastShot` with pure scalar mathematics.
 - [x] **Wave Escalation & Target Completion Fix:** Wave progression now properly advances from Wave 1 to Wave 2, 3, etc. upon eliminating the target horde count (`>=`), resetting the counter, awarding scrap and triple supply drops instead of getting stuck past target.
+- [x] **Preloader Asset Gate & Studio Audio Pre-Caching (Zero In-Game Pop-In):** (COMPLETED)
+  - **Full Studio Audio Pre-Caching:** Connected all 23 core studio sound effects (`assets/audio/`) directly into `THREE.DefaultLoadingManager` with `itemStart`/`itemEnd`. Downloaded and decoded arraybuffers upfront into WebAudio memory before spawning, eradicating the synthesized 2-minute "code sounds" lag. Real weapon, shell casing, engine roar, and zombie SFX play immediately on first fire.
+  - **Zero Pop-In 3D Asset Gating:** Purged premature 9-second timeout. Preloader strictly monitors all GLTF/GLB models (ACR viewmodel rig, Remington shotgun, Magnum, Mercedes-AMG ONE, Dodge SRT Demon, city blocks). Clicking "START" while downloading displays full tactical stream overlay and queues deployment until 100% cached and WebGL shaders are pre-warmed.
+  - **Live Asset Ticker:** Displays exact human-readable asset designations in real time (`STREAMING // ACR 6.8 Suppressed Carbine Rig [45%]`, `AUDIO // Mercedes-AMG ONE 1.6L Turbo V6 Engine SFX [80%]`).
+
+- [x] **Mobile Landscape Enforcer & Widescreen Fullscreen Touch Experience:** (COMPLETED)
+  - **Orientation Lock Screen (`#rotate-prompt`):** Dynamic CSS and JS orientation monitor detecting portrait mode on mobile/touch screens, displaying a cybernetic rotation prompt with phone swivel animation. Automatically reveals the game as soon as the phone is tilted horizontally.
+  - **Fullscreen & Landscape Orientation API:** Integrated `document.documentElement.requestFullscreen()` and `screen.orientation.lock('landscape')` on start tap and dedicated in-game mobile quick-toggle button (`#btn-mobile-fs`).
+  - **Cinematic Landscape Touch Layout:** Re-engineered `#touch-ui` for landscape proportions: expanded look-zone (65% screen width) for wide 360° thumb sweeps, ergonomic bottom-right fire trigger (red combat glow), accessible jump/reload/enter buttons, and padded left joystick with blue luminescent knob.
 - [ ] **Grenade / Pipe Bomb Throwables:** Deployable high-explosive ordnance with shrapnel bounce physics.
 - [x] **60 FPS WebGL Optimization Milestone (Eliminated Stutters & 8 FPS Slow-Motion):** (COMPLETED)
   - **95% Draw Call Collapse (~4,600 down to ~200):** Migrated individual city meshes (146 trees, 98 streetlamps, 196 curbs, 49 sidewalks, 252 crosswalks/stop lines) to native `THREE.InstancedMesh`.
@@ -156,10 +165,10 @@ Next High-Impact Milestone:
 
 ## 📦 Active Cache-Busted File Versions (Keep in Sync)
 When editing any of the following files, always bump their version in [index.html](file:///c:/Users/DARSHANA/Projects/Vespera%20Game/vespera/index.html):
-- `css/style.css?v=24`
+- `css/style.css?v=25`
 - `js/utils.js?v=8`
-- `js/preloader.js?v=1`
-- `js/audio.js?v=23`
+- `js/preloader.js?v=2`
+- `js/audio.js?v=24`
 - `js/world.js?v=10`
 - `js/cars.js?v=18`
 - `js/weaponvisual.js?v=14`
@@ -172,8 +181,9 @@ When editing any of the following files, always bump their version in [index.htm
 - `js/daynight.js?v=6`
 - `js/weather.js?v=4`
 - `js/hud.js?v=23`
+- `js/touch.js?v=2`
 - `js/extraction.js?v=1`
 - `js/objectives.js?v=2`
 - `js/playercharacter.js?v=3`
 - `js/player.js?v=25`
-- `js/main.js?v=24`
+- `js/main.js?v=25`

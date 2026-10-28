@@ -17,16 +17,32 @@ var Preloader = {
   assetNames: {
     'mercedes-benz_amg_one': 'VEHICLE // Mercedes-Benz AMG ONE (F1 Hybrid)',
     '2018_dodge_challenger_srt_demon': 'VEHICLE // Dodge Challenger SRT Demon (Supercharged V8)',
-    'buildings.glb': 'METROPOLIS // Modular Storefronts & City Blocks',
+    'buildings.glb': 'METROPOLIS // City Storefronts & Architecture',
     'futuristic_building': 'LANDMARK // Civic Skyscraper Tower',
-    'fps_arms_anim': 'VIEWMODEL // ACR Assault Rifle & Viewmodel Rig',
-    'shotgun': 'VIEWMODEL // Remington 870 12G Shotgun',
-    'revolver': 'VIEWMODEL // .357 Magnum Tactical Sidearm',
-    'ak47': 'WEAPONS // Ballistic Weapon Visuals',
-    'zombie': 'INFECTED // Neural Zombie Horde Archetypes',
+    'fps_arms_anim': 'VIEWMODEL // ACR 6.8 Suppressed Carbine Rig',
+    'shotgun.glb': 'VIEWMODEL // Remington 870 12G Pump Shotgun',
+    'shotgun_author': 'VIEWMODEL // Remington 870 12G Pump Shotgun',
+    'revolver.glb': 'VIEWMODEL // .357 Magnum Tactical Sidearm',
+    'ak47.glb': 'WEAPONS // Ballistic Weapon Visuals',
+    'zombie.glb': 'INFECTED // Neural Zombie Horde Archetypes',
     'mannequiny': 'SURVIVOR // Player Character Skeletal Rig',
-    'soldier': 'CONVOY // Military Extraction Escort Rig',
-    'prop_ak': 'PROPS // Military Weapon Prop'
+    'soldier.glb': 'CONVOY // Military Extraction Escort Rig',
+    'prop_ak.glb': 'PROPS // Military Weapon Prop',
+    'gunshot.mp3': 'AUDIO // Tactical Gunshot SFX',
+    'gunshot_suppressed': 'AUDIO // ACR 5.56 Suppressed Fire SFX',
+    'shotgun.mp3': 'AUDIO // 12G Shotgun Blast SFX',
+    'shotgun_reload': 'AUDIO // 12G Shell Chambering SFX',
+    'magnum.mp3': 'AUDIO // .357 Magnum Stopping Power Blast',
+    'magnum_reload': 'AUDIO // .357 Magnum Cylinder Reload SFX',
+    'reload.mp3': 'AUDIO // Mechanical Magazine Reload SFX',
+    'dry_fire.mp3': 'AUDIO // Weapon Dry Fire SFX',
+    'hit_marker.mp3': 'AUDIO // Tactical Hitmarker Confirmation SFX',
+    'impact_': 'AUDIO // Ballistic Impact & Surface Splatter SFX',
+    'engine_amg': 'AUDIO // Mercedes-AMG ONE 1.6L Turbo V6 Engine SFX',
+    'engine_demon': 'AUDIO // Dodge Demon 6.2L Supercharged V8 SFX',
+    'engine_start_': 'AUDIO // Vehicle Ignition & Starter Motor SFX',
+    'zombie_': 'AUDIO // Infected Vocalization & Shriek SFX',
+    'door_creak': 'AUDIO // Safehouse Vault Door SFX'
   },
 
   getFriendlyName: function(url){
@@ -64,6 +80,8 @@ var Preloader = {
     };
 
     mgr.onLoad = function(){
+      // Guard against premature onLoad before minimum core items have registered
+      if (self.total < 10) return;
       console.log('[VESPERA Preloader] All raw assets downloaded (' + self.loaded + '/' + self.total + '). Initializing GPU pipeline...');
       self.targetPercent = 95;
       self.activeAsset = 'PRE-COMPILING GPU SHADERS & VRAM TEXTURES...';
@@ -74,7 +92,7 @@ var Preloader = {
         self.targetPercent = 100;
         self.currentPercent = 100;
         self.onComplete();
-      }, 120);
+      }, 150);
     };
 
     mgr.onError = function(url){
@@ -83,16 +101,16 @@ var Preloader = {
       self.updateTargetPercent();
     };
 
-    // Safety timeout: Never leave the user stuck on loading screen if network stalls
+    // Stalled network notification (allows manual force start only after 30 seconds of waiting)
     setTimeout(function(){
       if (!self.isReady){
-        console.warn('[VESPERA Preloader] Safety timeout reached (forcing ready state).');
-        self.warmupGPU();
-        self.targetPercent = 100;
-        self.currentPercent = 100;
-        self.onComplete();
+        console.warn('[VESPERA Preloader] Streaming taking longer, enabling emergency override...');
+        var statusEl = document.getElementById('po-status-text');
+        if (statusEl && self.pendingStart){
+          statusEl.innerHTML = self.activeAsset + ' <br><span style="color:#00e5ff;font-size:11px;cursor:pointer;text-decoration:underline;display:inline-block;margin-top:6px;" onclick="Preloader.forceComplete()">[TAP TO FORCE DEPLOY ANYWAY]</span>';
+        }
       }
-    }, 9000);
+    }, 30000);
 
     // Start UI update animation loop
     this.startAnimationLoop();
@@ -219,7 +237,19 @@ var Preloader = {
     }
   },
 
+  forceComplete: function(){
+    console.warn('[VESPERA Preloader] Emergency deployment forced by player.');
+    this.warmupGPU();
+    this.targetPercent = 100;
+    this.currentPercent = 100;
+    this.onComplete();
+  },
+
   requestStart: function(){
+    if (window.enterMobileLandscape){
+      try { window.enterMobileLandscape(); } catch(e){}
+    }
+
     if (this.isReady){
       if (window.Main && Main.start) Main.start();
       return;

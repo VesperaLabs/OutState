@@ -51,6 +51,7 @@ var Main = {
       try { fn(); } catch(e){ console.error('[VESPERA Subsystem Error] ' + name + ':', e); }
     }
 
+    trySub('Audio', function(){ if (typeof AudioSys !== 'undefined') AudioSys.init(); });
     trySub('Effects', function(){ Effects.init(); });
     trySub('World', function(){ World.build(); });
     trySub('DayNight', function(){ DayNight.init(); });
@@ -84,7 +85,13 @@ var Main = {
     if (startBtn){
       startBtn.addEventListener('click', function(e){
         e.preventDefault();
-        Main.start();
+        if (window._onStartBtn){
+          window._onStartBtn();
+        } else if (typeof Preloader !== 'undefined' && !Preloader.isReady){
+          Preloader.requestStart();
+        } else {
+          Main.start();
+        }
       });
     }
 
@@ -152,6 +159,11 @@ var Main = {
     if (typeof Preloader !== 'undefined' && !Preloader.isReady){
       Preloader.requestStart();
       return;
+    }
+
+    // Trigger mobile landscape & fullscreen experience if on touch / mobile device
+    if (window.enterMobileLandscape){
+      try { window.enterMobileLandscape(); } catch(e){}
     }
 
     try {
@@ -263,3 +275,20 @@ if (document.readyState === 'loading') {
 } else {
   Main.init();
 }
+
+// Global Mobile Landscape & Fullscreen Orientation Trigger
+window.enterMobileLandscape = function(){
+  var docEl = document.documentElement;
+  var rfs = docEl.requestFullscreen || docEl.webkitRequestFullscreen || docEl.mozRequestFullScreen || docEl.msRequestFullscreen;
+  if (rfs){
+    try {
+      var p = rfs.call(docEl);
+      if (p && p.catch) p.catch(function(){});
+    } catch(e){}
+  }
+  if (screen.orientation && screen.orientation.lock){
+    try {
+      screen.orientation.lock('landscape').catch(function(){});
+    } catch(e){}
+  }
+};
