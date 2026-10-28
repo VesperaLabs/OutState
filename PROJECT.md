@@ -159,6 +159,7 @@ Next High-Impact Milestone:
   - **Bidirectional Fullscreen Controller (#btn-mobile-fs):** Robust toggle between fullscreen and windowed display (window.toggleFullscreen), dynamically swapping between maximize (⛶) and minimize (⤢) icons and locking landscape orientation.
   - **Header Touch Layer Isolation:** Shifted #look-zone top bound down to 56px, eliminating touch interception over top header controls (Pause, Fullscreen, Clock).
   - **Death Screen Z-Index & Touch Block Cleanup:** Elevated #death-screen to z-index: 250 and automatically hide #touch-ui during death. Added direct 	ouchstart and inline Player.respawn() handlers to the 'WAKE AGAIN' button (#btn-respawn), restoring 100% reliable instant respawn on mobile touches.
+- [x] **First-Shot Freeze Bug Fix (Ballistic Origin Resolution):** Fixed critical variable scoping in raycastShot where an undeclared origin identifier resolved to window.origin (string), throwing TypeError: origin.clone is not a function on the very first shot and freezing the execution loop on the muzzle flash frame.
 - [ ] **Grenade / Pipe Bomb Throwables:** Deployable high-explosive ordnance with shrapnel bounce physics.
 - [x] **60 FPS WebGL Optimization Milestone (Eliminated Stutters & 8 FPS Slow-Motion):** (COMPLETED)
   - **95% Draw Call Collapse (~4,600 down to ~200):** Migrated individual city meshes (146 trees, 98 streetlamps, 196 curbs, 49 sidewalks, 252 crosswalks/stop lines) to native `THREE.InstancedMesh`.
@@ -184,7 +185,7 @@ When editing any of the following files, always bump their version in [index.htm
 - `js/world.js?v=10`
 - `js/cars.js?v=18`
 - `js/weaponvisual.js?v=14`
-- `js/weapons.js?v=92`
+- `js/weapons.js?v=93`
 - `js/zombievisual.js?v=5`
 - `js/thugvisual.js?v=5`
 - `js/enemies.js?v=23`

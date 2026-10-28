@@ -1180,6 +1180,7 @@ onArmsLoaded: function() {
   raycastShot: function(dir, range, dmg, muzzlePos){
     // Origin is camera position for correct aiming (crosshair is screen center)
     _rcOrigin.copy(G.camera.position);
+    var origin = _rcOrigin;
     var ox = _rcOrigin.x, oy = _rcOrigin.y, oz = _rcOrigin.z;
     var dx = dir.x, dy = dir.y, dz = dir.z;
     var bestT = raycastSolids(_rcOrigin, dir, range);
