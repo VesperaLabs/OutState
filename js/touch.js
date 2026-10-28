@@ -13,7 +13,6 @@ var Touch = {
     'btn-enter':     { rightPct: 20, bottomPct: 28, scale: 1.0 },
     'btn-reload':    { rightPct: 8,  bottomPct: 42, scale: 1.0 },
     'btn-stage-rev': { rightPct: 20, bottomPct: 44, scale: 1.0 },
-    'btn-mobile-fs': { rightPct: 3, topPct: 4, scale: 1.0 }
   },
 
   controlNames: {

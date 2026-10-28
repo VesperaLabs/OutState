@@ -252,7 +252,10 @@ var Player = {
     G.player.dead = true;
     AudioSys.engineStop();
     if (G.player.inCar) Cars.exit();
-    document.getElementById('death-screen').style.display = 'flex';
+    var ds = document.getElementById('death-screen');
+    if (ds) ds.style.display = 'flex';
+    var tui = document.getElementById('touch-ui');
+    if (tui) tui.style.display = 'none';
     document.exitPointerLock && document.exitPointerLock();
   },
 
@@ -270,7 +273,10 @@ var Player = {
     G.player.yaw = Math.PI/4;
     G.player.vy = 0;
     G.player.onGround = true;
-    document.getElementById('death-screen').style.display = 'none';
+    var ds = document.getElementById('death-screen');
+    if (ds) ds.style.display = 'none';
+    var tui = document.getElementById('touch-ui');
+    if (tui && G.isMobile) tui.style.display = 'block';
     HUD.radio('VESPERA RADIO', "Back on your feet. The fog doesn't wait, and neither do I.", 5000);
   },
 

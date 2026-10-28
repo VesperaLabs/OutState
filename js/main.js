@@ -97,7 +97,8 @@ var Main = {
 
     var respawnBtn = document.getElementById('btn-respawn');
     if (respawnBtn){
-      respawnBtn.addEventListener('click', function(){
+      function handleRespawn(e){
+        if (e){ e.preventDefault(); e.stopPropagation(); }
         Player.respawn();
         if (!G.isMobile && canvas && canvas.requestPointerLock){
           try {
@@ -105,7 +106,29 @@ var Main = {
             if (p && typeof p.catch === 'function') p.catch(function(){});
           } catch(e){}
         }
-      });
+      }
+      respawnBtn.addEventListener('click', handleRespawn);
+      respawnBtn.addEventListener('touchstart', handleRespawn, { passive: false });
+    }
+
+    var mobilePauseBtn = document.getElementById('btn-mobile-pause');
+    if (mobilePauseBtn){
+      function handleMobilePause(e){
+        if (e){ e.preventDefault(); e.stopPropagation(); }
+        if (typeof HUD !== 'undefined' && HUD.togglePause) HUD.togglePause();
+      }
+      mobilePauseBtn.addEventListener('click', handleMobilePause);
+      mobilePauseBtn.addEventListener('touchstart', handleMobilePause, { passive: false });
+    }
+
+    var mobileFsBtn = document.getElementById('btn-mobile-fs');
+    if (mobileFsBtn){
+      function handleMobileFs(e){
+        if (e){ e.preventDefault(); e.stopPropagation(); }
+        if (window.toggleFullscreen) window.toggleFullscreen();
+      }
+      mobileFsBtn.addEventListener('click', handleMobileFs);
+      mobileFsBtn.addEventListener('touchstart', handleMobileFs, { passive: false });
     }
 
     this.animate();
@@ -276,19 +299,52 @@ if (document.readyState === 'loading') {
   Main.init();
 }
 
-// Global Mobile Landscape & Fullscreen Orientation Trigger
-window.enterMobileLandscape = function(){
-  var docEl = document.documentElement;
-  var rfs = docEl.requestFullscreen || docEl.webkitRequestFullscreen || docEl.mozRequestFullScreen || docEl.msRequestFullscreen;
-  if (rfs){
-    try {
-      var p = rfs.call(docEl);
-      if (p && p.catch) p.catch(function(){});
-    } catch(e){}
-  }
-  if (screen.orientation && screen.orientation.lock){
-    try {
-      screen.orientation.lock('landscape').catch(function(){});
-    } catch(e){}
+// Global Fullscreen & Orientation Controller
+window.toggleFullscreen = function(){
+  var doc = document;
+  var docEl = doc.documentElement;
+  var isFs = doc.fullscreenElement || doc.webkitFullscreenElement || doc.mozFullScreenElement || doc.msFullscreenElement;
+
+  if (isFs){
+    var efs = doc.exitFullscreen || doc.webkitExitFullscreen || doc.mozCancelFullScreen || doc.msExitFullscreen;
+    if (efs){
+      try {
+        var p = efs.call(doc);
+        if (p && p.catch) p.catch(function(){});
+      } catch(e){}
+    }
+  } else {
+    var rfs = docEl.requestFullscreen || docEl.webkitRequestFullscreen || docEl.mozRequestFullScreen || docEl.msRequestFullscreen;
+    if (rfs){
+      try {
+        var p = rfs.call(docEl);
+        if (p && p.then){
+          p.then(function(){
+            if (screen.orientation && screen.orientation.lock){
+              screen.orientation.lock('landscape').catch(function(){});
+            }
+          }).catch(function(){});
+        }
+      } catch(e){}
+    }
   }
 };
+
+window.enterMobileLandscape = function(){
+  window.toggleFullscreen();
+};
+
+function updateFullscreenIcon(){
+  var isFs = !!(document.fullscreenElement || document.webkitFullscreenElement);
+  var icon = document.getElementById('mtb-fs-icon');
+  if (icon){
+    icon.innerHTML = isFs ? '&#x2922;' : '&#x26f6;';
+  }
+  var label = document.querySelector('#btn-mobile-fs .mtb-label');
+  if (label){
+    label.textContent = isFs ? 'EXIT FS' : 'FULLSCREEN';
+  }
+}
+
+document.addEventListener('fullscreenchange', updateFullscreenIcon);
+document.addEventListener('webkitfullscreenchange', updateFullscreenIcon);

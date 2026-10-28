@@ -154,6 +154,11 @@ Next High-Impact Milestone:
   - **Anti-Edge Default Ergonomics:** Lifted all default controls up from screen edges (12%–44% vertical clearance), eradicating accidental triggers of Android navigation gesture pills and curved screen bezel deadzones.
   - **Mobile Ammo HUD Separation:** Shifted `#bottom-right` ammo counter inwards (`right: 210px`) on mobile viewports, preventing overlap with right-thumb fire and jump clusters.
   - **One-Tap Access:** Direct access buttons in Settings Menu (Controls & Bindings Tab), Pause Menu footer, and Title Screen.
+- [x] **Mobile Pause Menu, Fullscreen Controller & Wake Again Respawn Fix:** (COMPLETED)
+  - **On-Screen Mobile Pause & Menu Button (#btn-mobile-pause):** Dedicated header navigation button providing immediate one-tap access to the Vespera Configuration modal on Android/iOS devices without requiring a physical keyboard ESC key.
+  - **Bidirectional Fullscreen Controller (#btn-mobile-fs):** Robust toggle between fullscreen and windowed display (window.toggleFullscreen), dynamically swapping between maximize (⛶) and minimize (⤢) icons and locking landscape orientation.
+  - **Header Touch Layer Isolation:** Shifted #look-zone top bound down to 56px, eliminating touch interception over top header controls (Pause, Fullscreen, Clock).
+  - **Death Screen Z-Index & Touch Block Cleanup:** Elevated #death-screen to z-index: 250 and automatically hide #touch-ui during death. Added direct 	ouchstart and inline Player.respawn() handlers to the 'WAKE AGAIN' button (#btn-respawn), restoring 100% reliable instant respawn on mobile touches.
 - [ ] **Grenade / Pipe Bomb Throwables:** Deployable high-explosive ordnance with shrapnel bounce physics.
 - [x] **60 FPS WebGL Optimization Milestone (Eliminated Stutters & 8 FPS Slow-Motion):** (COMPLETED)
   - **95% Draw Call Collapse (~4,600 down to ~200):** Migrated individual city meshes (146 trees, 98 streetlamps, 196 curbs, 49 sidewalks, 252 crosswalks/stop lines) to native `THREE.InstancedMesh`.
@@ -172,7 +177,7 @@ Next High-Impact Milestone:
 
 ## 📦 Active Cache-Busted File Versions (Keep in Sync)
 When editing any of the following files, always bump their version in [index.html](file:///c:/Users/DARSHANA/Projects/Vespera%20Game/vespera/index.html):
-- `css/style.css?v=26`
+- `css/style.css?v=27`
 - `js/utils.js?v=8`
 - `js/preloader.js?v=2`
 - `js/audio.js?v=24`
@@ -188,9 +193,9 @@ When editing any of the following files, always bump their version in [index.htm
 - `js/daynight.js?v=6`
 - `js/weather.js?v=4`
 - `js/hud.js?v=24`
-- `js/touch.js?v=3`
+- `js/touch.js?v=4`
 - `js/extraction.js?v=1`
 - `js/objectives.js?v=2`
 - `js/playercharacter.js?v=3`
-- `js/player.js?v=25`
-- `js/main.js?v=25`
+- `js/player.js?v=26`
+- `js/main.js?v=26`

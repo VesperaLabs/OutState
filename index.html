@@ -8,7 +8,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600;700&family=Outfit:wght@300;400;500;600;700;800&family=Rajdhani:wght@500;600;700&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="css/style.css?v=26">
+<link rel="stylesheet" href="css/style.css?v=27">
 <script>
 window._onStartBtn = function(){
   if (window.enterMobileLandscape){
@@ -84,6 +84,18 @@ window._onStartBtn = function(){
     <div id="clock">07:20</div>
     <div id="phase-label">DAY</div>
   </div>
+    <!-- Mobile Top Bar (Pause Menu & Fullscreen) -->
+  <div id="mobile-top-bar">
+    <button id="btn-mobile-pause" class="mtb-btn" type="button" title="Pause / Menu">
+      <span class="mtb-icon">&#x23f8;</span>
+      <span class="mtb-label">MENU</span>
+    </button>
+    <button id="btn-mobile-fs" class="mtb-btn" type="button" title="Toggle Fullscreen">
+      <span class="mtb-icon" id="mtb-fs-icon">&#x26f6;</span>
+      <span class="mtb-label">FULLSCREEN</span>
+    </button>
+  </div>
+
   <div id="top-left">
     <canvas id="minimap" width="180" height="180"></canvas>
     <div id="objective" style="display:none;"></div>
@@ -173,7 +185,6 @@ window._onStartBtn = function(){
 
 <!-- Touch controls -->
 <div id="touch-ui">
-  <button id="btn-mobile-fs" class="mobile-fs-btn" title="Toggle Fullscreen">&#x26f6;</button>
   <div id="joy-move"><div id="joy-knob"></div></div>
   <div id="look-zone"></div>
   <div class="tbtn" id="btn-fire">FIRE</div>
@@ -256,7 +267,7 @@ window._onStartBtn = function(){
 <div id="death-screen">
   <h2>YOU DIED</h2>
   <p id="death-sub">The fog takes everyone, eventually.</p>
-  <button id="btn-respawn">WAKE AGAIN</button>
+  <button id="btn-respawn" onclick="Player.respawn()">WAKE AGAIN</button>
 </div>
 
 <!-- Dark Minimalist Tactical Settings & Configuration -->
@@ -798,11 +809,11 @@ window._onStartBtn = function(){
 <script src="js/daynight.js?v=6"></script>
 <script src="js/weather.js?v=4"></script>
 <script src="js/hud.js?v=24"></script>
-<script src="js/touch.js?v=3"></script>
+<script src="js/touch.js?v=4"></script>
 <script src="js/extraction.js?v=1"></script>
 <script src="js/objectives.js?v=2"></script>
 <script src="js/playercharacter.js?v=3"></script>
-<script src="js/player.js?v=25"></script>
-<script src="js/main.js?v=25"></script>
+<script src="js/player.js?v=26"></script>
+<script src="js/main.js?v=26"></script>
 </body>
 </html>
