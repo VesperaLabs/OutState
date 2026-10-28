@@ -486,13 +486,6 @@ var HUD = {
       localStorage.setItem('vespera_settings', JSON.stringify(G.settings));
     } catch(e){}
   },
-  togglePause: function(){
-    if (G.player.dead) return;
-    var wb = document.getElementById('workbench-modal');
-    if (wb && wb.style.display === 'flex') return; // workbench handles itself
-    var menu = document.getElementById('menu');
-    var isFromMenu = (menu && menu.style.display !== 'none');
-
   openCustomHudEditor: function(){
     if (this.el && this.el.pauseMenu) this.el.pauseMenu.style.display = 'none';
     if (window.Touch && Touch.openCustomEditor){

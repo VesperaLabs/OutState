@@ -994,10 +994,11 @@ onArmsLoaded: function() {
   },
 
   fire: function(){
-    var st = this.state, w = this.list[this.current];
-    if (G.paused || G.player.dead) return;
-    if (st.reloading > 0) return;
-    if (st.cooldown > 0) return;
+    try {
+      var st = this.state, w = this.list[this.current];
+      if (G.paused || G.player.dead) return;
+      if (st.reloading > 0) return;
+      if (st.cooldown > 0) return;
     if (st.mag <= 0){ AudioSys.dryFire(); st.cooldown = 0.25; return; }
 
     // If player is in a vehicle, execute dedicated drive-by ballistics & physics
@@ -1073,7 +1074,7 @@ onArmsLoaded: function() {
     G.player.pitch += w.recoil * recoilMult * rand(0.8,1.2);
     G.player.yaw += w.recoil * recoilMult * rand(-0.4,0.4);
     st.kick = 1 * (1 - st.adsAmount * 0.3);
-    HUD.spread(1 * spreadMult);
+    if (typeof HUD !== "undefined" && HUD.spread) HUD.spread(1 * spreadMult);
     var pellets = w.pellets || 1;
     var effSpread = w.spread * spreadMult;
     for (var p=0;p<pellets;p++){
@@ -1084,10 +1085,18 @@ onArmsLoaded: function() {
     }
     // Notify the character so the right arm kicks up
     if (PlayerCharacter && PlayerCharacter.triggerRecoil) PlayerCharacter.triggerRecoil();
-    HUD.ammo(st.mag, st.reserve);
+    if (typeof HUD !== "undefined" && HUD.ammo) HUD.ammo(st.mag, st.reserve);
     // Trigger the animated arms Shoot clip (rifle only)
     if (this.current === 'ak47' && this._armsPlay){
       this._armsPlay('fire', false, 0.03, 0.03);
+    }
+    } catch(fireErr){
+      console.error('[VESPERA FIRE ERROR]', fireErr);
+      if (this.state){
+        if (this.state.flash) this.state.flash.visible = false;
+        if (this.state.flashLight) this.state.flashLight.intensity = 0;
+        this.state.flashT = 0;
+      }
     }
   },
 
@@ -1170,7 +1179,7 @@ onArmsLoaded: function() {
 
     // 8. Update HUD
     if (typeof HUD !== 'undefined'){
-      HUD.ammo(st.mag, st.reserve);
+      if (typeof HUD !== "undefined" && HUD.ammo) HUD.ammo(st.mag, st.reserve);
       if (HUD.updateCarWeapon){
         HUD.updateCarWeapon(this.current, st.mag, st.reserve, false);
       }
@@ -1178,6 +1187,7 @@ onArmsLoaded: function() {
   },
 
   raycastShot: function(dir, range, dmg, muzzlePos){
+    try {
     // Origin is camera position for correct aiming (crosshair is screen center)
     _rcOrigin.copy(G.camera.position);
     var origin = _rcOrigin;
@@ -1321,6 +1331,10 @@ onArmsLoaded: function() {
       return false;
     }
     return false;
+    } catch(rcErr){
+      console.error('[VESPERA RAYCAST ERROR]', rcErr);
+      return false;
+    }
   },
 
   reload: function(){
@@ -1484,7 +1498,7 @@ onArmsLoaded: function() {
         var take = Math.min(need, st.reserve);
         st.mag += take; st.reserve -= take;
         if (typeof HUD !== 'undefined'){
-          HUD.ammo(st.mag, st.reserve);
+          if (typeof HUD !== "undefined" && HUD.ammo) HUD.ammo(st.mag, st.reserve);
           if (HUD.updateCarWeapon) HUD.updateCarWeapon(this.current, st.mag, st.reserve, false);
         }
       }
@@ -1519,7 +1533,7 @@ onArmsLoaded: function() {
         var need = w.mag - st.mag;
         var take = Math.min(need, st.reserve);
         st.mag += take; st.reserve -= take;
-        HUD.ammo(st.mag, st.reserve);
+        if (typeof HUD !== "undefined" && HUD.ammo) HUD.ammo(st.mag, st.reserve);
       }
     }
     if (st.flashT > 0){ st.flashT -= dt; if (st.flashT<=0){ st.flash.visible=false; st.flashLight.intensity=0; } }
@@ -1757,7 +1771,7 @@ onArmsLoaded: function() {
       m.rotation.z += (trz - m.rotation.z) * k;
     }
     // crosshair spread decay
-    HUD.spreadDecay(dt);
+    if (typeof HUD !== "undefined" && HUD.spreadDecay) HUD.spreadDecay(dt);
   }
 };
 
@@ -2157,6 +2171,7 @@ var Effects = {
 
   // 3D brass shell casing ejection with physics, tumbling and street bounce
   spawnCasing: function(pos, fwd, up, right){
+    try {
     if (!this.casingGeo) return;
     var mesh = new THREE.Mesh(this.casingGeo, this.casingMat.clone());
     mesh.position.copy(pos);
@@ -2181,10 +2196,14 @@ var Effects = {
       G.scene.remove(old.m);
       if (old.m.material) old.m.material.dispose();
     }
+    } catch(cErr){
+      console.error('[VESPERA CASING ERROR]', cErr);
+    }
   },
 
   // High-speed glowing bullet tracer with glowing round head
   spawnTracer: function(startPos, endPos){
+    try {
     if (!this.tracerMat) return;
     var geom = new THREE.BufferGeometry().setFromPoints([startPos.clone(), startPos.clone()]);
     var line = new THREE.Line(geom, this.tracerMat.clone());
@@ -2216,6 +2235,9 @@ var Effects = {
       speed: 210,
       tailLen: Math.min(4.5, dist * 0.4)
     });
+    } catch(tErr){
+      console.error('[VESPERA TRACER ERROR]', tErr);
+    }
   },
 
   // Wood splinters and sawdust burst when barricade planks are hammered or broken

@@ -185,7 +185,7 @@ When editing any of the following files, always bump their version in [index.htm
 - `js/world.js?v=10`
 - `js/cars.js?v=18`
 - `js/weaponvisual.js?v=14`
-- `js/weapons.js?v=93`
+- `js/weapons.js?v=94`
 - `js/zombievisual.js?v=5`
 - `js/thugvisual.js?v=5`
 - `js/enemies.js?v=23`
@@ -193,7 +193,7 @@ When editing any of the following files, always bump their version in [index.htm
 - `js/scavenging.js?v=1`
 - `js/daynight.js?v=6`
 - `js/weather.js?v=4`
-- `js/hud.js?v=24`
+- `js/hud.js?v=25`
 - `js/touch.js?v=4`
 - `js/extraction.js?v=1`
 - `js/objectives.js?v=2`
