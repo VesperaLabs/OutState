@@ -147,6 +147,13 @@ Next High-Impact Milestone:
   - **Orientation Lock Screen (`#rotate-prompt`):** Dynamic CSS and JS orientation monitor detecting portrait mode on mobile/touch screens, displaying a cybernetic rotation prompt with phone swivel animation. Automatically reveals the game as soon as the phone is tilted horizontally.
   - **Fullscreen & Landscape Orientation API:** Integrated `document.documentElement.requestFullscreen()` and `screen.orientation.lock('landscape')` on start tap and dedicated in-game mobile quick-toggle button (`#btn-mobile-fs`).
   - **Cinematic Landscape Touch Layout:** Re-engineered `#touch-ui` for landscape proportions: expanded look-zone (65% screen width) for wide 360° thumb sweeps, ergonomic bottom-right fire trigger (red combat glow), accessible jump/reload/enter buttons, and padded left joystick with blue luminescent knob.
+- [x] **Interactive Mobile Custom HUD Designer & Anti-Edge Ergonomics:** (COMPLETED)
+  - **Custom HUD Layout Designer:** Full visual in-game layout editor (`Touch.openCustomEditor`). Players can drag any button (Joystick, Fire, Jump, Reload, Car, Sprint, Stage Rev, Fullscreen) anywhere on screen with boundary collision clamping.
+  - **Dynamic Button Scaling:** Real-time scale controls (`-` / `+` from 65% to 165%) to customize button size for thumb ergonomics.
+  - **Cross-Resolution Persistence:** Coordinates stored in percentages (`leftPct`, `bottomPct`) to `localStorage` (`vespera_custom_hud`), maintaining consistent relative positions across screen rotations, phone aspect ratios, and fullscreens.
+  - **Anti-Edge Default Ergonomics:** Lifted all default controls up from screen edges (12%–44% vertical clearance), eradicating accidental triggers of Android navigation gesture pills and curved screen bezel deadzones.
+  - **Mobile Ammo HUD Separation:** Shifted `#bottom-right` ammo counter inwards (`right: 210px`) on mobile viewports, preventing overlap with right-thumb fire and jump clusters.
+  - **One-Tap Access:** Direct access buttons in Settings Menu (Controls & Bindings Tab), Pause Menu footer, and Title Screen.
 - [ ] **Grenade / Pipe Bomb Throwables:** Deployable high-explosive ordnance with shrapnel bounce physics.
 - [x] **60 FPS WebGL Optimization Milestone (Eliminated Stutters & 8 FPS Slow-Motion):** (COMPLETED)
   - **95% Draw Call Collapse (~4,600 down to ~200):** Migrated individual city meshes (146 trees, 98 streetlamps, 196 curbs, 49 sidewalks, 252 crosswalks/stop lines) to native `THREE.InstancedMesh`.
@@ -165,7 +172,7 @@ Next High-Impact Milestone:
 
 ## 📦 Active Cache-Busted File Versions (Keep in Sync)
 When editing any of the following files, always bump their version in [index.html](file:///c:/Users/DARSHANA/Projects/Vespera%20Game/vespera/index.html):
-- `css/style.css?v=25`
+- `css/style.css?v=26`
 - `js/utils.js?v=8`
 - `js/preloader.js?v=2`
 - `js/audio.js?v=24`
@@ -180,8 +187,8 @@ When editing any of the following files, always bump their version in [index.htm
 - `js/scavenging.js?v=1`
 - `js/daynight.js?v=6`
 - `js/weather.js?v=4`
-- `js/hud.js?v=23`
-- `js/touch.js?v=2`
+- `js/hud.js?v=24`
+- `js/touch.js?v=3`
 - `js/extraction.js?v=1`
 - `js/objectives.js?v=2`
 - `js/playercharacter.js?v=3`

@@ -8,7 +8,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600;700&family=Outfit:wght@300;400;500;600;700;800&family=Rajdhani:wght@500;600;700&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="css/style.css?v=25">
+<link rel="stylesheet" href="css/style.css?v=26">
 <script>
 window._onStartBtn = function(){
   if (window.enterMobileLandscape){
@@ -138,6 +138,39 @@ window._onStartBtn = function(){
   </div>
 </div>
 
+<!-- Interactive Mobile Custom HUD Editor Overlay -->
+<div id="hud-editor-overlay" style="display:none;">
+  <div class="he-top-bar">
+    <div class="he-title-wrap">
+      <span class="he-tag">CUSTOM HUD DESIGNER</span>
+      <h3 class="he-title">DRAG &amp; RESIZE CONTROLS</h3>
+    </div>
+    <div class="he-actions">
+      <button class="he-btn he-btn-save" onclick="Touch.saveCustomLayout()">&#128190; SAVE &amp; APPLY</button>
+      <button class="he-btn he-btn-reset" onclick="Touch.resetCustomLayout()">&#8634; RESET DEFAULT</button>
+      <button class="he-btn he-btn-exit" onclick="Touch.closeCustomEditor()">&times; EXIT</button>
+    </div>
+  </div>
+
+  <div class="he-guidelines">
+    <div class="he-grid-line he-grid-h"></div>
+    <div class="he-grid-line he-grid-v"></div>
+  </div>
+
+  <div id="he-control-panel" class="he-control-panel" style="display:none;">
+    <div class="he-panel-info">
+      <span class="he-panel-tag">SELECTED CONTROL</span>
+      <span id="he-selected-name" class="he-selected-name">PRIMARY FIRE</span>
+    </div>
+    <div class="he-scale-controls">
+      <span class="he-scale-lbl">SIZE:</span>
+      <button class="he-scale-btn" onclick="Touch.adjustSelectedScale(-0.1)">&minus;</button>
+      <span id="he-selected-scale" class="he-scale-val">100%</span>
+      <button class="he-scale-btn" onclick="Touch.adjustSelectedScale(0.1)">&plus;</button>
+    </div>
+  </div>
+</div>
+
 <!-- Touch controls -->
 <div id="touch-ui">
   <button id="btn-mobile-fs" class="mobile-fs-btn" title="Toggle Fullscreen">&#x26f6;</button>
@@ -209,6 +242,7 @@ window._onStartBtn = function(){
         <span id="btn-start-text">STREAMING ASSETS... [ 0% ]</span>
       </button>
       <button id="btn-start-settings" type="button" onclick="HUD.togglePause()">⚙ CONFIGURATION</button>
+      <button id="btn-start-hud" type="button" onclick="Touch.openCustomEditor()" style="background:rgba(0,229,255,0.15);border:1px solid rgba(0,229,255,0.4);color:#00e5ff;padding:14px 20px;font-size:14px;letter-spacing:2px;font-weight:bold;cursor:pointer;">🎮 CUSTOM HUD</button>
     </div>
     <div id="controls-help">
       <b>Desktop:</b> WASD move · Mouse look · Click/X fire · R reload · E interact/car · O open/close door · Shift sprint · Space jump<br>
@@ -526,6 +560,37 @@ window._onStartBtn = function(){
             <!-- Dynamically populated by HUD.renderKeybindings() -->
           </div>
         </div>
+
+        <!-- Mobile Touch HUD Customizer Card -->
+        <div class="pm-card pm-card-mobile-hud" style="margin-top:18px;">
+          <div class="pm-card-header">
+            <div style="display:inline-flex;align-items:center;gap:8px;">
+              <span class="pm-card-icon">📱</span>
+              <span class="pm-card-title">MOBILE TOUCH HUD &amp; CONTROLS</span>
+            </div>
+            <button type="button" class="pm-help" onmouseenter="HUD.showTooltip(this, 'MOBILE HUD', 'Launch the visual layout designer to drag, reposition, and resize the joystick, fire button, reload, and car buttons anywhere on screen.')" onmouseleave="HUD.hideTooltip()" onfocus="HUD.showTooltip(this, 'MOBILE HUD', 'Launch the visual layout designer to drag, reposition, and resize the joystick, fire button, reload, and car buttons anywhere on screen.')" onblur="HUD.hideTooltip()">?</button>
+          </div>
+          <div class="pm-ctrl-block">
+            <div class="pm-lbl">
+              <span class="pm-lbl-left">
+                <span>ON-SCREEN BUTTON LAYOUT DESIGNER</span>
+              </span>
+              <span class="pm-val-badge">CONFIGURABLE</span>
+            </div>
+            <div style="display:flex;gap:12px;margin-top:12px;flex-wrap:wrap;">
+              <button class="pm-btn pm-btn-resume" type="button" style="padding:10px 20px;font-size:13px;display:inline-flex;align-items:center;gap:8px;" onclick="HUD.openCustomHudEditor()">
+                <span>🎮</span>
+                <span>OPEN HUD DESIGNER (DRAG &amp; RESIZE)</span>
+              </button>
+              <button class="pm-btn pm-btn-respawn" type="button" style="padding:10px 18px;font-size:13px;" onclick="Touch.resetCustomLayout()">
+                <span>↺ RESET TO DEFAULT</span>
+              </button>
+            </div>
+            <div class="pm-info-note" style="margin-top:10px;">
+              Freely move controls away from the screen edges, adjust button scales, and save your custom layout.
+            </div>
+          </div>
+        </div>
       </div>
 
       <!-- TAB 3: TELEMETRY & HARDWARE -->
@@ -612,6 +677,9 @@ window._onStartBtn = function(){
       <div class="pm-footer-right">
         <button class="pm-btn pm-btn-respawn" type="button" onclick="HUD.togglePause(); Player.respawn();">
           RESPAWN AT BOULEVARD
+        </button>
+        <button class="pm-btn pm-btn-hud-shortcut" type="button" onclick="HUD.openCustomHudEditor()" style="background:rgba(0,229,255,0.15);border:1px solid rgba(0,229,255,0.4);color:#00e5ff;">
+          🎮 CUSTOM HUD
         </button>
         <button class="pm-btn pm-btn-resume" type="button" onclick="HUD.togglePause()">
           RESUME MISSION
@@ -729,8 +797,8 @@ window._onStartBtn = function(){
 <script src="js/scavenging.js?v=1"></script>
 <script src="js/daynight.js?v=6"></script>
 <script src="js/weather.js?v=4"></script>
-<script src="js/hud.js?v=23"></script>
-<script src="js/touch.js?v=2"></script>
+<script src="js/hud.js?v=24"></script>
+<script src="js/touch.js?v=3"></script>
 <script src="js/extraction.js?v=1"></script>
 <script src="js/objectives.js?v=2"></script>
 <script src="js/playercharacter.js?v=3"></script>

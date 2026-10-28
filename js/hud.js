@@ -493,6 +493,14 @@ var HUD = {
     var menu = document.getElementById('menu');
     var isFromMenu = (menu && menu.style.display !== 'none');
 
+  openCustomHudEditor: function(){
+    if (this.el && this.el.pauseMenu) this.el.pauseMenu.style.display = 'none';
+    if (window.Touch && Touch.openCustomEditor){
+      Touch.openCustomEditor();
+    }
+  },
+
+  togglePause: function(isFromMenu){
     var pm = this.el.pauseMenu;
     if (!pm) return;
     var isPaused = (pm.style.display === 'flex');
